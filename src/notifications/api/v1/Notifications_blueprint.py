@@ -1,0 +1,95 @@
+from quart import Blueprint, request
+from quart_schema import QuartSchema, validate_request, validate_response, tag
+from ...models.Notifications import NotificationCreate, NotificationView
+from ...services.Notifications_Service import Notifications_Service
+from ...db.Notifications_Repository import Notifications_Repository
+from ...core import extensions as ext
+
+from logging import getLogger
+from ...core.config import settings
+
+
+#qué entra y qué sale
+
+logger = getLogger(__name__)
+logger.setLevel(settings.LOG_LEVEL)
+
+bp = Blueprint("notifications_bp_v1", __name__, url_prefix="/v1/notifications")
+
+
+
+@bp.post("/")
+@validate_request(NotificationCreate)
+@validate_response(NotificationView, 201)
+@tag(["v1"])
+async def create_notification(data: NotificationCreate):
+    # AHORA ext.db ya está inicializada
+    repo = Notifications_Repository(ext.db)
+    service = Notifications_Service(repo)
+
+    logger.info("Received new notification")
+    result = await service.register_event(data)
+    return result, 201
+
+
+# ------------------------
+# GET: obtener todas
+# ------------------------
+@bp.get("/")
+@validate_response(list[NotificationView], 200)
+@tag(["v1"])
+async def list_notifications():
+    repo = Notifications_Repository(ext.db)
+    service = Notifications_Service(repo)
+
+    logger.info("Fetching all notifications")
+    result = await service.get_all()
+    return result, 200
+
+@bp.get("/user/<userId>")
+@tag(["v1"])
+async def get_notifications(userId: str):
+    repo = Notifications_Repository(ext.db)
+    notifications = await repo.get_notifications_by_user(userId)
+    return notifications, 200
+
+
+
+
+@bp.post("/login")
+async def notification_login():
+    body = await request.get_json()
+
+    data = NotificationCreate(
+        userId=body["userId"],
+        message=body.get("message", "Inicio de sesión"),
+        type="login"
+    )
+
+    service = Notifications_Service()
+    result = await service.register_event(data)
+    return result, 201
+
+
+@bp.post("/transaction")
+async def notification_transaction():
+    body = await request.get_json()
+
+    success = body.get("success", True)
+
+    notif_type = "transaction-ok" if success else "transaction-failed"
+
+    data = NotificationCreate(
+        userId=body["userId"],
+        message=body.get("message", "Movimiento en tu cuenta"),
+        type=notif_type
+    )
+
+    service = Notifications_Service()
+    result = await service.register_event(data)
+    return result, 201
+
+
+
+
+
