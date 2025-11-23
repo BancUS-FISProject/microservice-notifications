@@ -1,0 +1,233 @@
+2025-11-19 17:24:11,260 - INFO:     Settings loaded.
+2025-11-19 17:24:11,270 - INFO:     Routes registered
+2025-11-19 17:24:11,285 - INFO:     Service is starting up...
+2025-11-19 17:24:11,289 - INFO:     Connecting to Database
+2025-11-19 17:24:11,625 - INFO:     Database connected
+2025-11-19 17:24:11,626 - INFO:     Checking collections...
+2025-11-19 17:24:11,680 - INFO:     Collection 'notifications' created.
+2025-11-19 17:24:11,680 - INFO:     Database client initialized and collections checked.
+2025-11-19 17:24:11,681 - INFO:     Service started successfully
+2025-11-19 17:24:11,859 - INFO:     Settings loaded.
+2025-11-19 17:24:11,861 - INFO:     Routes registered
+2025-11-19 17:24:11,864 - INFO:     Service is starting up...
+2025-11-19 17:24:11,864 - INFO:     Connecting to Database
+2025-11-19 17:24:11,903 - INFO:     Database connected
+2025-11-19 17:24:11,904 - INFO:     Checking collections...
+2025-11-19 17:24:11,907 - INFO:     Collection 'notifications' already exists.
+2025-11-19 17:24:11,907 - INFO:     Database client initialized and collections checked.
+2025-11-19 17:24:11,908 - INFO:     Service started successfully
+2025-11-19 17:24:12,000 - INFO:     Settings loaded.
+2025-11-19 17:24:12,002 - INFO:     Routes registered
+2025-11-19 17:24:12,006 - INFO:     Service is starting up...
+2025-11-19 17:24:12,006 - INFO:     Connecting to Database
+2025-11-19 17:24:12,051 - INFO:     Database connected
+2025-11-19 17:24:12,051 - INFO:     Checking collections...
+2025-11-19 17:24:12,055 - INFO:     Collection 'notifications' already exists.
+2025-11-19 17:24:12,056 - INFO:     Database client initialized and collections checked.
+2025-11-19 17:24:12,056 - INFO:     Service started successfully
+2025-11-19 17:31:36,035 - INFO:     Service is shutting down...
+2025-11-19 17:31:36,040 - INFO:     Closing Database
+2025-11-19 17:31:36,054 - INFO:     Service shut down complete.
+2025-11-19 17:31:36,354 - INFO:     Service is shutting down...
+2025-11-19 17:31:36,355 - INFO:     Closing Database
+2025-11-19 17:31:36,361 - INFO:     Service shut down complete.
+2025-11-19 17:31:36,801 - INFO:     Service is shutting down...
+2025-11-19 17:31:36,801 - INFO:     Closing Database
+2025-11-19 17:31:36,805 - INFO:     Service shut down complete.
+2025-11-19 17:31:39,433 - INFO:     Settings loaded.
+2025-11-19 17:31:39,868 - INFO:     Settings loaded.
+2025-11-19 17:31:40,337 - INFO:     Settings loaded.
+2025-11-19 17:32:05,768 - INFO:     Settings loaded.
+2025-11-19 17:32:05,780 - INFO:     Routes registered
+2025-11-19 17:32:05,800 - INFO:     Service is starting up...
+2025-11-19 17:32:05,805 - INFO:     Connecting to Database
+2025-11-19 17:32:05,905 - INFO:     Database connected
+2025-11-19 17:32:05,906 - INFO:     Checking collections...
+2025-11-19 17:32:05,910 - INFO:     Collection 'notifications' already exists.
+2025-11-19 17:32:05,910 - INFO:     Database client initialized and collections checked.
+2025-11-19 17:32:05,912 - INFO:     Service started successfully
+2025-11-19 17:32:06,362 - INFO:     Settings loaded.
+2025-11-19 17:32:06,366 - INFO:     Routes registered
+2025-11-19 17:32:06,373 - INFO:     Service is starting up...
+2025-11-19 17:32:06,373 - INFO:     Connecting to Database
+2025-11-19 17:32:06,437 - INFO:     Database connected
+2025-11-19 17:32:06,437 - INFO:     Checking collections...
+2025-11-19 17:32:06,441 - INFO:     Collection 'notifications' already exists.
+2025-11-19 17:32:06,442 - INFO:     Database client initialized and collections checked.
+2025-11-19 17:32:06,442 - INFO:     Service started successfully
+2025-11-19 17:32:06,833 - INFO:     Settings loaded.
+2025-11-19 17:32:06,834 - INFO:     Routes registered
+2025-11-19 17:32:06,840 - INFO:     Service is starting up...
+2025-11-19 17:32:06,840 - INFO:     Connecting to Database
+2025-11-19 17:32:06,910 - INFO:     Database connected
+2025-11-19 17:32:06,911 - INFO:     Checking collections...
+2025-11-19 17:32:06,915 - INFO:     Collection 'notifications' already exists.
+2025-11-19 17:32:06,916 - INFO:     Database client initialized and collections checked.
+2025-11-19 17:32:06,917 - INFO:     Service started successfully
+2025-11-19 17:35:02,008 - INFO:     Data recibida: userId='123' type='test' title='Mi título' message='Hola mundo'
+2025-11-19 17:35:02,009 - ERROR:     Exception on request POST /v1/notifications/
+Traceback (most recent call last):
+  File "C:\Users\CM172JU\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\quart\app.py", line 1464, in handle_request
+    return await self.full_dispatch_request(request_context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\CM172JU\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\quart\app.py", line 1502, in full_dispatch_request
+    result = await self.handle_user_exception(error)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\CM172JU\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\quart\app.py", line 1059, in handle_user_exception
+    raise error
+  File "C:\Users\CM172JU\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\quart\app.py", line 1500, in full_dispatch_request
+    result = await self.dispatch_request(request_context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\CM172JU\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\quart\app.py", line 1597, in dispatch_request
+    return await self.ensure_async(handler)(**request_.view_args)  # type: ignore[return-value]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\CM172JU\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\quart_schema\validation.py", line 170, in wrapper
+    return await current_app.ensure_async(func)(*args, data=model, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\CM172JU\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\quart_schema\validation.py", line 209, in wrapper
+    result = await current_app.ensure_async(func)(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\CM172JU\OneDrive - UNIVERSIDAD DE SEVILLA\Máster Ing Software\FIS(C)\microservice-notifications\src\notifications_service\api\v1\Notifications_blueprint.py", line 28, in create_notification
+    service = Notifications_Service()
+TypeError: Notifications_Service.__init__() missing 1 required positional argument: 'repository'
+2025-11-19 17:36:04,745 - INFO:     Service is shutting down...
+2025-11-19 17:36:04,745 - INFO:     Closing Database
+2025-11-19 17:36:04,750 - INFO:     Service shut down complete.
+2025-11-19 17:36:04,853 - INFO:     Service is shutting down...
+2025-11-19 17:36:04,854 - INFO:     Closing Database
+2025-11-19 17:36:04,858 - INFO:     Service shut down complete.
+2025-11-19 17:36:05,176 - INFO:     Service is shutting down...
+2025-11-19 17:36:05,177 - INFO:     Closing Database
+2025-11-19 17:36:05,181 - INFO:     Service shut down complete.
+2025-11-19 17:36:16,569 - INFO:     Settings loaded.
+2025-11-19 17:36:16,571 - INFO:     Routes registered
+2025-11-19 17:36:16,571 - INFO:     Routes registered
+2025-11-19 17:36:16,573 - INFO:     Service is starting up...
+2025-11-19 17:36:16,574 - INFO:     Connecting to Database
+2025-11-19 17:36:16,574 - INFO:     Service is starting up...
+2025-11-19 17:36:16,575 - INFO:     Connecting to Database
+2025-11-19 17:36:16,893 - INFO:     Database connected
+2025-11-19 17:36:16,894 - INFO:     Database connected
+...
+2025-11-19 17:36:16,894 - INFO:     Checking collections...
+2025-11-19 17:36:16,895 - INFO:     Checking collections...
+2025-11-19 17:36:16,897 - INFO:     Collection 'notifications' already exists.
+2025-11-19 17:36:16,897 - INFO:     Database client initialized and collections checked.
+2025-11-19 17:36:16,897 - INFO:     Database client initialized and collections checked.
+2025-11-19 17:36:16,897 - INFO:     Service started successfully
+2025-11-19 17:36:16,897 - INFO:     Service started successfully
+2025-11-19 17:36:16,897 - INFO:     Service started successfully
+2025-11-19 17:36:20,124 - INFO:     Settings loaded.
+2025-11-19 17:36:20,126 - INFO:     Routes registered
+2025-11-19 17:36:20,130 - INFO:     Service is starting up...
+2025-11-19 17:36:20,132 - INFO:     Connecting to Database
+2025-11-19 17:36:20,183 - INFO:     Database connected
+2025-11-19 17:36:20,185 - INFO:     Checking collections...
+2025-11-19 17:36:20,189 - INFO:     Settings loaded.
+2025-11-19 17:36:20,191 - INFO:     Routes registered
+2025-11-19 17:36:20,194 - INFO:     Collection 'notifications' already exists.
+2025-11-19 17:36:20,195 - INFO:     Database client initialized and collections checked.
+2025-11-19 17:36:20,197 - INFO:     Service started successfully
+2025-11-19 17:36:20,199 - INFO:     Service is starting up...
+2025-11-19 17:36:20,206 - INFO:     Connecting to Database
+2025-11-19 17:36:20,289 - INFO:     Database connected
+2025-11-19 17:36:20,294 - INFO:     Checking collections...
+2025-11-19 17:36:20,301 - INFO:     Collection 'notifications' already exists.
+2025-11-19 17:36:20,303 - INFO:     Database client initialized and collections checked.
+2025-11-19 17:36:20,307 - INFO:     Service started successfully
+2025-11-19 17:36:20,393 - INFO:     Settings loaded.
+2025-11-19 17:36:20,396 - INFO:     Routes registered
+2025-11-19 17:36:20,401 - INFO:     Service is starting up...
+2025-11-19 17:36:20,404 - INFO:     Connecting to Database
+2025-11-19 17:36:20,451 - INFO:     Database connected
+2025-11-19 17:36:20,452 - INFO:     Checking collections...
+2025-11-19 17:36:20,457 - INFO:     Collection 'notifications' already exists.
+2025-11-19 17:36:20,458 - INFO:     Database client initialized and collections checked.
+2025-11-19 17:36:20,459 - INFO:     Service started successfully
+2025-11-19 17:36:26,454 - ERROR:     Exception on request POST /v1/notifications/
+Traceback (most recent call last):
+  File "C:\Users\CM172JU\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\quart\app.py", line 1464, in handle_request
+    return await self.full_dispatch_request(request_context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\CM172JU\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\quart\app.py", line 1502, in full_dispatch_request
+    result = await self.handle_user_exception(error)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\CM172JU\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\quart\app.py", line 1059, in handle_user_exception
+    raise error
+  File "C:\Users\CM172JU\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\quart\app.py", line 1500, in full_dispatch_request
+    result = await self.dispatch_request(request_context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\CM172JU\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\quart\app.py", line 1597, in dispatch_request
+    return await self.ensure_async(handler)(**request_.view_args)  # type: ignore[return-value]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\CM172JU\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\quart_schema\validation.py", line 170, in wrapper
+    return await current_app.ensure_async(func)(*args, data=model, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\CM172JU\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\quart_schema\validation.py", line 209, in wrapper
+    result = await current_app.ensure_async(func)(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\CM172JU\OneDrive - UNIVERSIDAD DE SEVILLA\Máster Ing Software\FIS(C)\microservice-notifications\src\notifications_service\api\v1\Notifications_blueprint.py", line 20, in create_notification
+    service = Notifications_Service()
+TypeError: Notifications_Service.__init__() missing 1 required positional argument: 'repository'
+2025-11-19 17:36:30,716 - ERROR:     Exception on request POST /v1/notifications/
+Traceback (most recent call last):
+  File "C:\Users\CM172JU\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\quart\app.py", line 1464, in handle_request
+    return await self.full_dispatch_request(request_context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\CM172JU\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\quart\app.py", line 1502, in full_dispatch_request
+    result = await self.handle_user_exception(error)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\CM172JU\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\quart\app.py", line 1059, in handle_user_exception
+    raise error
+  File "C:\Users\CM172JU\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\quart\app.py", line 1500, in full_dispatch_request
+    result = await self.dispatch_request(request_context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\CM172JU\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\quart\app.py", line 1597, in dispatch_request
+    return await self.ensure_async(handler)(**request_.view_args)  # type: ignore[return-value]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\CM172JU\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\quart_schema\validation.py", line 170, in wrapper
+    return await current_app.ensure_async(func)(*args, data=model, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\CM172JU\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\quart_schema\validation.py", line 209, in wrapper
+    result = await current_app.ensure_async(func)(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\CM172JU\OneDrive - UNIVERSIDAD DE SEVILLA\Máster Ing Software\FIS(C)\microservice-notifications\src\notifications_service\api\v1\Notifications_blueprint.py", line 20, in create_notification
+    service = Notifications_Service()
+TypeError: Notifications_Service.__init__() missing 1 required positional argument: 'repository'
+2025-11-19 17:41:56,399 - INFO:     Settings loaded.
+2025-11-19 17:41:56,400 - INFO:     Routes registered
+2025-11-19 17:41:56,405 - INFO:     Service is starting up...
+2025-11-19 17:41:56,405 - INFO:     Connecting to Database
+2025-11-19 17:41:56,484 - INFO:     Database connected
+2025-11-19 17:41:56,485 - INFO:     Checking collections...
+2025-11-19 17:41:56,488 - INFO:     Collection 'notifications' already exists.
+2025-11-19 17:41:56,489 - INFO:     Database client initialized and collections checked.
+2025-11-19 17:41:56,489 - INFO:     Service started successfully
+2025-11-19 17:42:01,295 - ERROR:     Exception on request POST /v1/notifications/
+Traceback (most recent call last):
+  File "C:\Users\CM172JU\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\quart\app.py", line 1464, in handle_request
+    return await self.full_dispatch_request(request_context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\CM172JU\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\quart\app.py", line 1502, in full_dispatch_request
+    result = await self.handle_user_exception(error)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\CM172JU\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\quart\app.py", line 1059, in handle_user_exception
+    raise error
+  File "C:\Users\CM172JU\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\quart\app.py", line 1500, in full_dispatch_request
+    result = await self.dispatch_request(request_context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\CM172JU\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\quart\app.py", line 1597, in dispatch_request
+    return await self.ensure_async(handler)(**request_.view_args)  # type: ignore[return-value]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\CM172JU\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\quart_schema\validation.py", line 170, in wrapper
+    return await current_app.ensure_async(func)(*args, data=model, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\CM172JU\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\quart_schema\validation.py", line 209, in wrapper
+    result = await current_app.ensure_async(func)(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\CM172JU\OneDrive - UNIVERSIDAD DE SEVILLA\Máster Ing Software\FIS(C)\microservice-notifications\src\notifications_service\api\v1\Notifications_blueprint.py", line 20, in create_notification
+    service = Notifications_Service()
+TypeError: Notifications_Service.__init__() missing 1 required positional argument: 'repository'
+2025-11-19 18:03:36,153 - INFO:     Service is shutting down...
+2025-11-19 18:03:36,153 - INFO:     Closing Database
+2025-11-19 18:03:36,157 - INFO:     Service shut down complete.
