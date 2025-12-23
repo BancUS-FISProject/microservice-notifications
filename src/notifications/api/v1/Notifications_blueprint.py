@@ -26,8 +26,8 @@ async def create_notification(data: NotificationCreate):
         
         logger.info("Received new notification")
         result = await service.register_event(data)
-        return result, 201
-        #return result.model_dump(by_alias=True), 201
+        #return result, 201
+        return result.model_dump(by_alias=False), 201
 
     except Exception as e:
         import traceback
