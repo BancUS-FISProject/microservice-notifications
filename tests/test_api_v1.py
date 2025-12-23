@@ -14,7 +14,8 @@ valid_notification = {
 @pytest.mark.asyncio
 async def test_create_notification_success():
 
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=10.0) as client:
+
         response = await client.post(BASE_URL, json=valid_notification)
 
         #assert response.status_code == 201, "Create notif fail"
