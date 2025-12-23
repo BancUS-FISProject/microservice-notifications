@@ -24,6 +24,9 @@ jobs:
     env:
       MONGO_CONNECTION_STRING: mongodb://localhost:27017
       MONGO_DATABASE_NAME: notifications_db
+      #SENDGRID_API_KEY: SG.xxxxxxxxxxxxxxxxx
+      #SENDGRID_FROM_EMAIL: notificaciones@FISBANK.com
+
       #MONGO_CONNECTION_STRING: ${{ secrets.MONGO_CONNECTION_STRING }}
       #MONGO_DATABASE_NAME: ${{ secrets.MONGO_DATABASE_NAME }}
 
