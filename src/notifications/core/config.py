@@ -19,3 +19,14 @@ class Settings(BaseSettings):
     )
 
 settings = Settings()
+
+from pydantic_settings import BaseSettings
+
+class Settings(BaseSettings):
+    SENDGRID_API_KEY: str = ""
+    SENDGRID_FROM_EMAIL: str = ""
+
+    class Config:
+        env_file = ".env"
+
+settings = Settings()
