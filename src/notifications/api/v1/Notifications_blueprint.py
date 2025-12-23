@@ -4,29 +4,25 @@ from ...models.Notifications import NotificationCreate, NotificationView
 from ...services.Notifications_Service import Notifications_Service
 from ...db.Notifications_Repository import Notifications_Repository
 from ...core import extensions as ext
-
 from logging import getLogger
 from ...core.config import settings
-
-
-#qué entra y qué sale
 
 logger = getLogger(__name__)
 logger.setLevel(settings.LOG_LEVEL)
 
 bp = Blueprint("notifications_bp_v1", __name__, url_prefix="/v1/notifications")
 
-
-
+# ------------------------
+# POST: crear notificación
+# ------------------------
 @bp.post("/")
+@tag(["Notifications - Crear"])
 @validate_request(NotificationCreate)
 @validate_response(NotificationView, 201)
-@tag(["v1"])
 async def create_notification(data: NotificationCreate):
-    # AHORA ext.db ya está inicializada
     repo = Notifications_Repository(ext.db)
     service = Notifications_Service(repo)
-
+    
     logger.info("Received new notification")
     result = await service.register_event(data)
     return result, 201
@@ -35,28 +31,35 @@ async def create_notification(data: NotificationCreate):
 # ------------------------
 # GET: obtener todas
 # ------------------------
-@bp.get("/")
+@bp.get("/all")
+@tag(["Notifications - Listar todas"])
 @validate_response(list[NotificationView], 200)
-@tag(["v1"])
 async def list_notifications():
     repo = Notifications_Repository(ext.db)
     service = Notifications_Service(repo)
-
     logger.info("Fetching all notifications")
     result = await service.get_all()
     return result, 200
 
+
+# ------------------------
+# GET por usuario
+# ------------------------
 @bp.get("/user/<userId>")
-@tag(["v1"])
+@tag(["Notifications - Por usuario"])
 async def get_notifications(userId: str):
     repo = Notifications_Repository(ext.db)
     notifications = await repo.get_notifications_by_user(userId)
     return notifications, 200
 
 
-
-
+# ------------------------
+# POST login event
+# ------------------------
 @bp.post("/login")
+@validate_request(NotificationCreate)
+@validate_response(NotificationView, 201)
+@tag(["Eventos - Login"])
 async def notification_login():
     body = await request.get_json()
 
@@ -71,12 +74,16 @@ async def notification_login():
     return result, 201
 
 
+# ------------------------
+# POST transaction event
+# ------------------------
 @bp.post("/transaction")
+@validate_request(NotificationCreate)
+@validate_response(NotificationView, 201)
+@tag(["Eventos - Transacciones"])
 async def notification_transaction():
     body = await request.get_json()
-
     success = body.get("success", True)
-
     notif_type = "transaction-ok" if success else "transaction-failed"
 
     data = NotificationCreate(
@@ -88,8 +95,3 @@ async def notification_transaction():
     service = Notifications_Service()
     result = await service.register_event(data)
     return result, 201
-
-
-
-
-
