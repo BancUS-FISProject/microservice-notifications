@@ -18,7 +18,7 @@ bp = Blueprint("notifications_bp_v1", __name__, url_prefix="/v1/notifications")
 @bp.post("/")
 @tag(["Notifications - Crear"])
 @validate_request(NotificationCreate)
-@validate_response(NotificationView, 201)
+#@validate_response(NotificationView, 201)
 async def create_notification(data: NotificationCreate):
     try:
         repo = Notifications_Repository(ext.db)
