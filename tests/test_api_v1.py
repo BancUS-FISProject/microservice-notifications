@@ -1,7 +1,5 @@
 import pytest
 import httpx
-import logging
-from fastapi import APIRouter, HTTPException
 
 BASE_URL = "http://127.0.0.1:8000/v1/notifications/"
 
