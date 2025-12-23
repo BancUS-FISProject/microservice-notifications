@@ -15,7 +15,7 @@ valid_notification = {
 @pytest.mark.asyncio
 async def test_create_notification_success():
 
-    await ext.init_db_client() 
+    #await ext.init_db_client() 
 
     async with httpx.AsyncClient(timeout=10.0) as client:
 
@@ -32,7 +32,7 @@ async def test_create_notification_success():
         assert data["message"] == valid_notification["message"]
         assert "id" in data  # Mongo devuelve el id como string
 
-    await ext.close_db_client()
+    #await ext.close_db_client()
     
 
 
