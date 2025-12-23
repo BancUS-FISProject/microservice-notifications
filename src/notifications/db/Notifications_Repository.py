@@ -25,8 +25,13 @@ class Notifications_Repository:
         # Convertimos ObjectId a str para que Pydantic no falle
         #if created and "_id" in created:
         #    created["_id"] = str(created["_id"])
+        print("CREATED DOC >>>", created)
+        print("TYPE createdAt >>>", type(created.get("createdAt")))
+
+        created["_id"] = str(created["_id"])
+        return created
     
-        return NotificationView.model_validate(created)
+        #return NotificationView.model_validate(created)
     
 
     async def get_all_notifications(self) -> list[NotificationView]:
