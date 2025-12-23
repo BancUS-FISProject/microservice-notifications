@@ -1,14 +1,14 @@
 from quart import Blueprint, request
-from quart_schema import QuartSchema, validate_request, validate_response, tag
+from quart_schema import validate_request, validate_response, tag
 from ...models.Notifications import NotificationCreate, NotificationView
 from ...services.Notifications_Service import Notifications_Service
 from ...db.Notifications_Repository import Notifications_Repository
 from ...core import extensions as ext
 from logging import getLogger
-from ...core.config import settings
+#from ...core.config import settings
 
 logger = getLogger(__name__)
-logger.setLevel(settings.LOG_LEVEL)
+#logger.setLevel(settings.LOG_LEVEL)
 
 bp = Blueprint("notifications_bp_v1", __name__, url_prefix="/v1/notifications")
 
