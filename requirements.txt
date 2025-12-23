@@ -32,3 +32,4 @@ fastapi
 uvicorn
 pytest
 pymongo
+httpx
