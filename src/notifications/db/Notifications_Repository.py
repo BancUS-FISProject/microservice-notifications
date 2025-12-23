@@ -29,9 +29,9 @@ class Notifications_Repository:
         print("TYPE createdAt >>>", type(created.get("createdAt")))
 
         created["_id"] = str(created["_id"])
-        return created
+        #return created
     
-        #return NotificationView.model_validate(created)
+        return NotificationView.model_validate(created)
     
 
     async def get_all_notifications(self) -> list[NotificationView]:
