@@ -8,32 +8,28 @@ BASE_URL = "http://127.0.0.1:8000/v1/notifications/"
 # Datos válidos 
 valid_notification = {
     "userId": "123",
-    "type": "test",
+    "type": "login",
     "title": "Mi título",
     "message": "Hola mundo"
 }
 
 @pytest.mark.asyncio
 async def test_create_notification_success():
-    try:
-        async with httpx.AsyncClient() as client:
-            response = await client.post(BASE_URL, json=valid_notification)
 
-            #assert response.status_code == 201, "Create notif fail"
-            assert response.status_code == 201, response.text
+    async with httpx.AsyncClient() as client:
+        response = await client.post(BASE_URL, json=valid_notification)
 
-            data = response.json()
-            # Comprobamos que los datos devueltos coincidan
-            assert data["userId"] == valid_notification["userId"]
-            assert data["type"] == valid_notification["type"]
-            assert data["title"] == valid_notification["title"]
-            assert data["message"] == valid_notification["message"]
-            assert "id" in data  # Mongo devuelve el id como string
+        #assert response.status_code == 201, "Create notif fail"
+        assert response.status_code == 201, response.text
 
-    except Exception as e:
-        logging.exception("Failed to create notification")
-        raise HTTPException(status_code=500, detail=str(e))
-        
+        data = response.json()
+        # Comprobamos que los datos devueltos coincidan
+        assert data["userId"] == valid_notification["userId"]
+        assert data["type"] == valid_notification["type"]
+        assert data["title"] == valid_notification["title"]
+        assert data["message"] == valid_notification["message"]
+        assert "id" in data  # Mongo devuelve el id como string
+    
 
 
 @pytest.mark.asyncio

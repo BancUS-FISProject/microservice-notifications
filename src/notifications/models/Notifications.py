@@ -14,14 +14,16 @@ class NotificationBase(BaseModel):
 
 class NotificationCreate(BaseModel):
     userId: str
-    type: str
+    type: Literal["login", "transaction-ok", "transaction-failed"]
     title: str | None = None
     message: str
 
 class NotificationView(BaseModel):
+    model_config = {"populate_by_name": True}
+
     id: str = Field(alias="_id")
     userId: str
     type: str
     title: str | None
     message: str
-    createdAt: datetime = Field(default_factory=datetime.utcnow)
+    createdAt: datetime
