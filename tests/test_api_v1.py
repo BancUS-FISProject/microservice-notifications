@@ -16,8 +16,9 @@ async def test_create_notification_success():
     async with httpx.AsyncClient() as client:
         response = await client.post(BASE_URL, json=valid_notification)
 
-        assert response.status_code == 201, "Create notif fail"
-
+        #assert response.status_code == 201, "Create notif fail"
+        assert response.status_code == 201, response.text
+        
         data = response.json()
         # Comprobamos que los datos devueltos coincidan
         assert data["userId"] == valid_notification["userId"]
@@ -25,7 +26,7 @@ async def test_create_notification_success():
         assert data["title"] == valid_notification["title"]
         assert data["message"] == valid_notification["message"]
         assert "id" in data  # Mongo devuelve el id como string
-        assert response.status_code == 201, response.text
+        
 
 
 @pytest.mark.asyncio
