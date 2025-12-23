@@ -25,7 +25,7 @@ async def create_notification(data: NotificationCreate):
     
     logger.info("Received new notification")
     result = await service.register_event(data)
-    return result, 201
+    return result
 
 
 # ------------------------
@@ -39,7 +39,7 @@ async def list_notifications():
     service = Notifications_Service(repo)
     logger.info("Fetching all notifications")
     result = await service.get_all()
-    return result, 200
+    return result
 
 
 # ------------------------
@@ -50,7 +50,7 @@ async def list_notifications():
 async def get_notifications(userId: str):
     repo = Notifications_Repository(ext.db)
     notifications = await repo.get_notifications_by_user(userId)
-    return notifications, 200
+    return notifications
 
 
 # ------------------------
@@ -71,7 +71,7 @@ async def notification_login():
 
     service = Notifications_Service()
     result = await service.register_event(data)
-    return result, 201
+    return result
 
 
 # ------------------------
@@ -94,4 +94,4 @@ async def notification_transaction():
 
     service = Notifications_Service()
     result = await service.register_event(data)
-    return result, 201
+    return result
