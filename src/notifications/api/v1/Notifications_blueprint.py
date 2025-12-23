@@ -20,12 +20,19 @@ bp = Blueprint("notifications_bp_v1", __name__, url_prefix="/v1/notifications")
 @validate_request(NotificationCreate)
 @validate_response(NotificationView, 201)
 async def create_notification(data: NotificationCreate):
-    repo = Notifications_Repository(ext.db)
-    service = Notifications_Service(repo)
-    
-    logger.info("Received new notification")
-    result = await service.register_event(data)
-    return result
+    try:
+        repo = Notifications_Repository(ext.db)
+        service = Notifications_Service(repo)
+        
+        logger.info("Received new notification")
+        result = await service.register_event(data)
+        return result
+
+    except Exception as e:
+        import traceback
+        print("ERROR EN /v1/notifications")
+        print(traceback.format_exc())
+        raise
 
 
 # ------------------------
