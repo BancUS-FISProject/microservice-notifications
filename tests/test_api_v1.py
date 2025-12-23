@@ -25,7 +25,8 @@ async def test_create_notification_success():
         assert data["title"] == valid_notification["title"]
         assert data["message"] == valid_notification["message"]
         assert "id" in data  # Mongo devuelve el id como string
-        
+        assert response.status_code == 201, response.text
+
 
 @pytest.mark.asyncio
 async def test_create_notification_missing_field():
