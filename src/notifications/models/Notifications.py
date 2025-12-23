@@ -25,3 +25,5 @@ class NotificationView(BaseModel):
     title: str | None
     message: str
     createdAt: datetime
+    class Config:
+        populate_by_name = True

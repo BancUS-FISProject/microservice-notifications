@@ -23,8 +23,8 @@ class Notifications_Repository:
         created = await self.collection.find_one({"_id": result.inserted_id})
     
         # Convertimos ObjectId a str para que Pydantic no falle
-        if created and "_id" in created:
-            created["_id"] = str(created["_id"])
+        #if created and "_id" in created:
+        #    created["_id"] = str(created["_id"])
     
         return NotificationView.model_validate(created)
     
