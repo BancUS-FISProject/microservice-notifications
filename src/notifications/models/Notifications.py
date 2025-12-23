@@ -24,6 +24,4 @@ class NotificationView(BaseModel):
     type: str
     title: str | None
     message: str
-    createdAt: datetime
-    class Config:
-        populate_by_name = True
+    createdAt: datetime = Field(default_factory=datetime.utcnow)
