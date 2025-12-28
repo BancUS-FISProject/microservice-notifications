@@ -1,4 +1,5 @@
 from logging import getLogger
+from unittest import result
 from bson import ObjectId
 from ..models. Notifications import NotificationBase, NotificationCreate, NotificationView
 
@@ -53,6 +54,24 @@ class Notifications_Repository:
             doc["_id"] = str(doc["_id"])
             results.append(doc)
         return results
+    
+    async def update_notification(self, notification_id: str, data: dict):
+        result = await self.collection.find_one_and_update(
+        {"_id": ObjectId(notification_id)},
+        {"$set": data},
+        return_document=True
+    )
+
+        if result:
+            result["_id"] = str(result["_id"])
+        return result
+
+
+    async def delete_notification(self, notification_id: str) -> bool:
+        result = await self.collection.delete_one(
+            {"_id": ObjectId(notification_id)}
+        )
+        return result.deleted_count == 1
 
 
    

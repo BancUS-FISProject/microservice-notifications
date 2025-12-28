@@ -39,3 +39,5 @@ pytest-tornasync
 pytest-trio
 pytest-twisted
 twisted
+sendgrid
+pydantic[email]
