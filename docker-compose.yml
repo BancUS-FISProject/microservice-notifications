@@ -1,0 +1,29 @@
+version: '3.8'
+services:
+  mongo:
+    image: mongo:6
+    container_name: ms_notifications_mongo
+    restart: unless-stopped
+    volumes:
+      - mongo_data:/data/db
+    ports:
+      - "27017:27017"
+
+  notifications:
+    build: .
+    image: microservice-notifications:local
+    container_name: ms_notifications_api
+    depends_on:
+      - mongo
+    environment:
+      - MONGO_CONNECTION_STRING=mongodb://mongo:27017
+      - MONGO_DATABASE_NAME=notifications_db
+      - SENDGRID_API_KEY=${SENDGRID_API_KEY}
+      - SENDGRID_FROM_EMAIL=elenaberdu@gmail.com
+    command: uvicorn src.notifications.app:create_app --factory --host 0.0.0.0 --port 8000
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+volumes:
+  mongo_data:
