@@ -2,6 +2,6 @@
 .venv/
 .idea/
 __pycache__/
-.log.txt
+log.txt
 *.log.*
 *.log
