@@ -5,6 +5,7 @@ from ..core.config import settings
 from logging import getLogger
 import ssl
 import certifi
+import os
 
 
 logger = getLogger(__name__)
@@ -14,9 +15,14 @@ ssl_context = ssl.create_default_context(cafile=certifi.where())
 
 class EmailService:
     def __init__(self):
+        self.enabled = os.getenv("EMAIL_ENABLED", "true").lower() == "true"
+        if not self.enabled:
+            return
         self.sg = SendGridAPIClient(api_key=settings.SENDGRID_API_KEY)
 
     async def send_notification_email(self, to_email: str, subject: str, content: str):
+        if not self.enabled:
+            return {"status": "email disabled"}
         try:
             message = Mail(
                 from_email=settings.SENDGRID_FROM_EMAIL,
