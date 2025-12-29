@@ -7,20 +7,21 @@ from datetime import datetime
 # =====================================================
 class NotificationBase(BaseModel):
     userId: str
-    email: EmailStr
+    email: EmailStr | None
 
     type: Literal[
         "login",
         "transaction-ok",
         "transaction-failed",
-        "scheduled-payment"
+        "scheduled-payment",
+        "history-request"
     ]
 
     title: Optional[str] = None
     message: str
 
     # Datos específicos del evento (flexible)
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: Optional[Dict[str, Any]] = Field(default_factory=dict)
 
     createdAt: datetime = Field(default_factory=datetime.utcnow)
 
@@ -30,18 +31,19 @@ class NotificationBase(BaseModel):
 # =====================================================
 class NotificationCreate(BaseModel):
     userId: str
-    email: EmailStr
+    email: EmailStr | None
 
     type: Literal[
         "login",
         "transaction-ok",
         "transaction-failed",
-        "scheduled-payment"
+        "scheduled-payment",
+        "history-request"
     ]
 
     title: Optional[str] = None
     message: str
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: Optional[Dict[str, Any]] = Field(default_factory=dict)
 
 
 # =====================================================
@@ -53,12 +55,12 @@ class NotificationView(BaseModel):
     id: str = Field(alias="_id")
 
     userId: str
-    email: EmailStr
+    email: EmailStr| None
 
     type: str
     title: Optional[str]
     message: str
-    metadata: Dict[str, Any]
+    metadata: Optional[Dict[str, Any]] = Field(default_factory=dict)
 
     createdAt: datetime
 
@@ -73,8 +75,24 @@ class NotificationEvent(BaseModel):
         "login",
         "transaction-ok",
         "transaction-failed",
-        "scheduled-payment"
+        "scheduled-payment",
+        "history-request"
     ]
 
     # Información contextual del evento
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: Optional[Dict[str, Any]] = Field(default_factory=dict)
+
+# =====================================================
+# UPDATE DE NOTIFICACIÓN
+# =====================================================
+class NotificationUpdate(BaseModel):
+    title: Optional[str] = None
+    message: Optional[str] = None
+    type: Optional[Literal[
+        "login",
+        "transaction-ok",
+        "transaction-failed",
+        "scheduled-payment",
+        "history-request"
+    ]] = None
+    metadata: Optional[Dict[str, Any]] = Field(default_factory=dict)
