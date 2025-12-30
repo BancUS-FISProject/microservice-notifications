@@ -1,7 +1,27 @@
-.env
+# OS
+.DS_Store
+Thumbs.db
+# Python
 .venv/
-.idea/
 __pycache__/
+.pytest_cache/
+*.pyc
+
+# Node / JS
+node_modules/
+npm-debug.log
+yarn.lock
+
+# Env
+.env
+.env.*
+.env.test
+
+# Logs
+*.log
 log.txt
 *.log.*
-*.log
+
+# OS
+.DS_Store
+Thumbs.db

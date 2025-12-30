@@ -46,3 +46,13 @@ jobs:
       - name: Run tests
         run: |
           python -m pytest tests/test_api_v2.py -v
+    
+      - name: Install JS test dependencies
+        run: |
+          cd tests-js
+          npm install
+
+      - name: Run JS API tests (Jest)
+        run: |
+          cd tests-js
+          npm test
