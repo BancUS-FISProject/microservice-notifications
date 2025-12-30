@@ -27,7 +27,8 @@ async def receive_event(data: NotificationEvent):
     Recibe eventos desde otros MS (login, pagos, etc).
     """
     service = Notifications_Service()
-    return await service.handle_event(data)
+    result = await service.handle_event(data)
+    return result, 201
 
 
 # ======================================================
