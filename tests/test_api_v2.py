@@ -15,14 +15,18 @@ async def test_event_login():
         "metadata": {}
     }
 
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=30.0) as client:
         res = await client.post(
             "http://127.0.0.1:8000/v1/notifications/events",
             json=payload
         )
 
-    assert res.status_code == 201
+    print(f"\n[test_event_login] Status: {res.status_code}")
+    print(f"[test_event_login] Response: {res.text}")
+    
+    assert res.status_code == 201, f"Expected 201, got {res.status_code}: {res.text}"
     data = res.json()
+    print(f"[test_event_login] JSON: {data}")
     assert data["type"] == "login"
     assert "inicio de sesión" in data["message"].lower()
 
@@ -38,7 +42,7 @@ async def test_event_invalid_type():
         "metadata": {}
     }
 
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=30.0) as client:
         res = await client.post(
             "http://127.0.0.1:8000/v1/notifications/events",
             json=payload
@@ -64,11 +68,16 @@ async def test_event_history():
         }
     }
 
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=30.0) as client:
         res = await client.post(
             "http://127.0.0.1:8000/v1/notifications/events",
             json=payload
         )
 
-    assert res.status_code == 201
-    assert "historial" in res.json()["title"].lower()
+    print(f"\n[test_event_history] Status: {res.status_code}")
+    print(f"[test_event_history] Response: {res.text}")
+    
+    assert res.status_code == 201, f"Expected 201, got {res.status_code}: {res.text}"
+    data = res.json()
+    print(f"[test_event_history] JSON: {data}")
+    assert "historial" in data["title"].lower()
