@@ -10,6 +10,7 @@ from ..services.Email_Service import EmailService
 from logging import getLogger
 import ssl
 import certifi
+from flask import abort
 
 #qué hace el microservicio de verdad
 logger = getLogger(__name__)
@@ -19,9 +20,9 @@ ssl_context = ssl.create_default_context(cafile=certifi.where())
 class Notifications_Service:
 
     PLAN_RULES = {
-        "basic": {"transaction-ok", "transaction-failed"},
-        "premium": {"transaction-ok", "transaction-failed", "login", "scheduled-payment", "fraud-detected"},
-        "business": {
+        "basico": {"transaction-ok", "transaction-failed"},
+        "estudiante": {"transaction-ok", "transaction-failed", "login", "scheduled-payment", "fraud-detected"},
+        "pro": {
             "transaction-ok",
             "transaction-failed",
             "login",
@@ -135,10 +136,17 @@ class Notifications_Service:
             if event.metadata else None
             )
 
-            history_message = await self.send_history_email(
-                user_id=event.userId,
-                month=month
-            )
+            try:
+                history_message = await self.send_history_email(
+                    user_id=event.userId,
+                    month=month
+                )
+
+            except PermissionError as e:
+                abort(403, description=str(e))
+
+            except ValueError as e:
+                abort(400, description=str(e))
 
             title = "Tu historial de movimientos"
             message = history_message
@@ -174,8 +182,8 @@ class Notifications_Service:
         logger.error(f"USER DATA RAW: {user}")
 
         #Recogemos el email y el plan del usuario
-        email = user.get("email")
-        plan = user.get("plan", "basic")
+        email = user.get("email", "nomail@example.com")
+        plan = user.get("plan", "pro")
 
         # Construir la vista de salida
         email_sent = False
@@ -272,15 +280,17 @@ class Notifications_Service:
             logger.error(f"USER DATA en send_history_email: {user} después de asignar month por defecto")
 
         if not isinstance(user, dict):
-            logger.warning(f"User data inválido para userId={user_id}: {user}")
-            raise ValueError("No se pudo obtener la información del usuario")
+            logger.warning(f"User data inválido para userId={user_id}: {user}, se le asignará un valor por defecto")
+            user = {}
+            #raise ValueError("No se pudo obtener la información del usuario")
+            
 
-        email = user.get("email")
-        plan = user.get("plan", "business")
+        email = user.get("email", "nomail@example.com")
+        plan = user.get("plan", "pro")
         name = user.get("name", "-")
 
         # 2. Validar plan
-        if plan != "business":
+        if plan != "pro":
             logger.info(
                 f"Usuario {name} con plan '{plan}' ha intentado solicitar historial"
             )
@@ -418,17 +428,23 @@ class Notifications_Service:
 
 class UsersClient:
     async def get_user_data(self, user_id: str) -> dict | None:
-        logger.error("ENTRANDO EN UsersClient.get_user_data CON verify=False")
-        async with httpx.AsyncClient(
-            timeout=5.0,
-            verify=False
-        ) as client:
-            resp = await client.get(f"http://microservice-user-auth:3000/v1/users/{user_id}")
-            logger.error("dentro de async with")
-            if resp.status_code == 200:
-                logger.error("response 200")
-                return resp.json()
-        return "No se ha encontrado el usuario"
+        try:
+            async with httpx.AsyncClient(
+                timeout=5.0,
+                verify=False
+            ) as client:
+                resp = await client.get(
+                    f"http://microservice-user-auth:3000/v1/users/{user_id}"
+                )
+                if resp.status_code == 200:
+                    return resp.json()
+
+        except Exception as e:
+            logger.warning(
+                f"No se pudo contactar con user-auth para userId={user_id}: {e}"
+            )
+
+        return None
     
 
 class UsersClientssss:
@@ -437,15 +453,15 @@ class UsersClientssss:
         fake_users = {
             "123": {
                 "email": "basicuser@example.com",
-                "subscription": "basic"
+                "subscription": "basico"
             },
             "234": {
-                "email": "premiumuser@example.com",
-                "subscription": "premium"
+                "email": "studentuser@example.com",
+                "subscription": "estudiante"
             },
             "999": {
-                "email": "businessuser@example.com",
-                "subscription": "business"
+                "email": "prouser@example.com",
+                "subscription": "pro"
             }
         }
 
@@ -453,7 +469,7 @@ class UsersClientssss:
             user_id,
             {
                 "email": "default@example.com",
-                "subscription": "basic"
+                "subscription": "basico"
             }
         )
 

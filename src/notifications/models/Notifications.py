@@ -17,7 +17,7 @@ class NotificationBase(BaseModel):
         "history-request",
         "fraud-detected"
     ]
-    plan: Optional[Literal["basic", "premium", "business"]] = None
+    plan: Optional[Literal["basico", "estudiante", "pro"]] = None
     title: Optional[str] = None
     message: str
     # Datos específicos del evento (flexible)
@@ -43,7 +43,7 @@ class NotificationCreate(BaseModel):
         "history-request",
         "fraud-detected"
     ]
-    plan: Optional[Literal["basic", "premium", "business"]] = None
+    plan: Optional[Literal["basico", "estudiante", "pro"]] = None
     title: Optional[str] = None
     message: str
     metadata: Optional[Dict[str, Any]] = Field(default_factory=dict)
@@ -86,7 +86,7 @@ class NotificationEvent(BaseModel):
         "history-request",
         "fraud-detected"
     ]
-    plan: Optional[Literal["basic", "premium", "business"]] = None
+    plan: Optional[Literal["basico", "estudiante", "pro"]] = None
 
     # Información contextual del evento
     metadata: Optional[Dict[str, Any]] = Field(default_factory=dict)
@@ -105,7 +105,7 @@ class NotificationUpdate(BaseModel):
         "history-request",
         "fraud-detected"
     ]] = None
-    plan: Literal["basic", "premium", "business"] | None = None
+    plan: Literal["basico", "estudiante", "pro"] | None = None
     metadata: Optional[Dict[str, Any]] = Field(default_factory=dict)
     email_sent: Optional[bool] = None
     email_reason: Optional[str] = None
