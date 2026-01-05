@@ -45,6 +45,14 @@ async def get_notifications_by_user(userId: str):
     repo = Notifications_Repository(ext.db)
     return await repo.get_notifications_by_user(userId)
 
+# ======================================================
+# SOLICITUD ENVÍO DE HISTORIAL (FRONTEND)
+# ======================================================
+@bp.post("/user/<userId>/send-history")
+async def send_history_email(userId: str):
+    service = Notifications_Service()
+    await service.send_history_email(userId)
+    return {"status": "email sent"}, 200
 
 # ======================================================
 # CONSULTA GLOBAL (ADMIN)
@@ -117,6 +125,14 @@ async def test_email():
 
     return {"status": "email sent"}
 
+# ======================================================
+# HEALTH
+# ======================================================
+@bp.get("/health")
+@tag(["Health"])
+async def health_check():
+ 
+    return {"status": "ok", "service": "notifications"}, 200
 
 # ------------------------
 # POST: crear notificación

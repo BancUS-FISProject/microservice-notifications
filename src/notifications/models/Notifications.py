@@ -7,21 +7,23 @@ from datetime import datetime
 # =====================================================
 class NotificationBase(BaseModel):
     userId: str
-    email: EmailStr | None
+    email: Optional[EmailStr] | None
 
     type: Literal[
         "login",
         "transaction-ok",
         "transaction-failed",
         "scheduled-payment",
-        "history-request"
+        "history-request",
+        "fraud-detected"
     ]
-
+    plan: Optional[Literal["basic", "premium", "business"]] = None
     title: Optional[str] = None
     message: str
-
     # Datos específicos del evento (flexible)
     metadata: Optional[Dict[str, Any]] = Field(default_factory=dict)
+    email_sent: Optional[bool] = None
+    email_reason: Optional[str] = None
 
     createdAt: datetime = Field(default_factory=datetime.utcnow)
 
@@ -31,19 +33,22 @@ class NotificationBase(BaseModel):
 # =====================================================
 class NotificationCreate(BaseModel):
     userId: str
-    email: EmailStr | None
+    email: Optional[EmailStr] | None
 
     type: Literal[
         "login",
         "transaction-ok",
         "transaction-failed",
         "scheduled-payment",
-        "history-request"
+        "history-request",
+        "fraud-detected"
     ]
-
+    plan: Optional[Literal["basic", "premium", "business"]] = None
     title: Optional[str] = None
     message: str
     metadata: Optional[Dict[str, Any]] = Field(default_factory=dict)
+    email_sent: Optional[bool] = None
+    email_reason: Optional[str] = None
 
 
 # =====================================================
@@ -55,12 +60,14 @@ class NotificationView(BaseModel):
     id: str = Field(alias="_id")
 
     userId: str
-    email: EmailStr| None
-
+    email: Optional[EmailStr] | None
+    plan: Optional[str] = None
     type: str
     title: Optional[str]
     message: str
     metadata: Optional[Dict[str, Any]] = Field(default_factory=dict)
+    email_sent: Optional[bool] = None
+    email_reason: Optional[str] = None
 
     createdAt: datetime
 
@@ -76,8 +83,10 @@ class NotificationEvent(BaseModel):
         "transaction-ok",
         "transaction-failed",
         "scheduled-payment",
-        "history-request"
+        "history-request",
+        "fraud-detected"
     ]
+    plan: Optional[Literal["basic", "premium", "business"]] = None
 
     # Información contextual del evento
     metadata: Optional[Dict[str, Any]] = Field(default_factory=dict)
@@ -93,6 +102,10 @@ class NotificationUpdate(BaseModel):
         "transaction-ok",
         "transaction-failed",
         "scheduled-payment",
-        "history-request"
+        "history-request",
+        "fraud-detected"
     ]] = None
+    plan: Literal["basic", "premium", "business"] | None = None
     metadata: Optional[Dict[str, Any]] = Field(default_factory=dict)
+    email_sent: Optional[bool] = None
+    email_reason: Optional[str] = None

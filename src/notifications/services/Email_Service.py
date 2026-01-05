@@ -7,10 +7,17 @@ import ssl
 import certifi
 import os
 
+import urllib.request
+from urllib.request import urlopen
+import ssl
+import json
+
+
+ssl._create_default_https_context = ssl._create_unverified_context
 
 logger = getLogger(__name__)
 # FIX SSL 
-ssl_context = ssl.create_default_context(cafile=certifi.where())
+#ssl_context = ssl.create_default_context(cafile=certifi.where())
 #ssl._create_default_https_context = ssl._create_unverified_context
 
 class EmailService:
@@ -19,8 +26,12 @@ class EmailService:
         if not self.enabled:
             return
         self.sg = SendGridAPIClient(api_key=settings.SENDGRID_API_KEY)
+        #self.sg.client._http_client._context = ssl._create_unverified_context()
 
     async def send_notification_email(self, to_email: str, subject: str, content: str):
+        if not settings.SENDGRID_API_KEY:
+            logger.info("SendGrid API key not found - email skipped")
+            return  
         if not self.enabled:
             return {"status": "email disabled"}
         try:

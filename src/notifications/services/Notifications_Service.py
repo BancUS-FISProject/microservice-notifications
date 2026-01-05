@@ -1,3 +1,5 @@
+from email.mime import message
+from importlib.metadata import metadata
 import httpx
 from ..models.Notifications import NotificationBase, NotificationCreate, NotificationView, NotificationEvent
 from ..db.Notifications_Repository import Notifications_Repository
@@ -15,19 +17,22 @@ logger = getLogger(__name__)
 ssl_context = ssl.create_default_context(cafile=certifi.where())
 
 class Notifications_Service:
+
+    PLAN_RULES = {
+        "basic": {"transaction-ok", "transaction-failed"},
+        "premium": {"transaction-ok", "transaction-failed", "login", "scheduled-payment", "fraud-detected"},
+        "business": {
+            "transaction-ok",
+            "transaction-failed",
+            "login",
+            "scheduled-payment",
+            "history-request",
+            "fraud-detected",
+        },
+    }
+
     def __init__(
-        self,
-        repository: Notifications_Repository | None = None,
-        email_service: EmailService | None = None,
-    ):
-        self.repo = repository or Notifications_Repository(ext.db)
-        self.email_service = email_service or EmailService()
-
-
-class Notifications_Service:
-
-    def __init__(
-        self,
+        self, 
         repository: Notifications_Repository | None = None,
         email_service: EmailService | None = None,
         #users_client: UsersClient | None = None,
@@ -36,13 +41,18 @@ class Notifications_Service:
         self.email_service = email_service or EmailService()
         self.users_client = UsersClient()
 
+    def can_send_email(self, plan: str, event_type: str) -> bool:
+        return event_type in self.PLAN_RULES.get(plan, set())
+
     async def handle_event(self, event: NotificationEvent) -> NotificationView:
         """
         Punto único de entrada para eventos desde otros microservicios.
         Construye la notificación, la guarda y envía el email al usuario.
         """
+        logger.error(f"EVENT RECIBIDO: {event}")
 
         metadata = event.metadata or {}
+        logger.error(f"despues de metadata")
 
         # ======================
         # LOGIN
@@ -104,9 +114,9 @@ class Notifications_Service:
         # PAGO PROGRAMADO
         # ----------------------
         elif event.type == "scheduled-payment":
-            amount = event.metadata.get("amount")
-            date = event.metadata.get("scheduledDate")
-            recipient = event.metadata.get("recipient")
+            amount = metadata.get("amount")
+            date = metadata.get("scheduledDate")
+            recipient = metadata.get("recipient")
 
             title = "Pago programado"
             message = (
@@ -120,15 +130,87 @@ class Notifications_Service:
         # HISTORIAL
         # ======================
         elif event.type == "history-request":
+            month = (
+            event.metadata.get("month")
+            if event.metadata else None
+            )
+
+            history_message = await self.send_history_email(
+                user_id=event.userId,
+                month=month
+            )
+
             title = "Tu historial de movimientos"
-            message = self.format_history_email(event.metadata)
+            message = history_message
+            skip_generic_email = True
+            
+        # ======================
+        # ANTIFRAUDE
+        # ======================
+        elif event.type == "fraud-detected":
+            reason = metadata.get("reason", "Actividad sospechosa")
+            account = metadata.get("account", "Cuenta desconocida")
+
+            title = "Alerta de seguridad: posible fraude detectado"
+            message = (
+                f"Hemos detectado una actividad sospechosa.\n\n"
+                f"Cuenta: {account}\n"
+                f"Motivo: {reason}\n\n"
+                f"Nuestro equipo está revisando la situación. Te contactaremos si es necesario."
+            )
 
         else:
             raise ValueError(f"Tipo de evento no soportado: {event.type}")
 
-        
-        # Obtener email del usuario
-        email = await self.users_client.get_user_email(event.userId)
+
+        # Obtener info del usuario
+        logger.error("antes de get user")
+        user = await self.users_client.get_user_data(event.userId)
+        logger.error("después de get user")
+
+        if not isinstance(user, dict):
+            logger.warning(f"User data inválido para userId={event.userId}: {user}")
+            user = {}
+        logger.error(f"USER DATA RAW: {user}")
+
+        #Recogemos el email y el plan del usuario
+        email = user.get("email")
+        plan = user.get("plan", "basic")
+
+        # Construir la vista de salida
+        email_sent = False
+        email_reason = None
+
+        #Casuistica para no enviar email genérico al solicitar historial
+        skip_generic_email = locals().get("skip_generic_email", False)
+        if skip_generic_email:
+            email_sent = True
+            email_reason = None
+
+        # Enviar email si existe
+        elif not self.can_send_email(plan, event.type):
+            email_sent = False
+            email_reason = (
+                f"El plan '{plan}' no permite enviar emails "
+                f"para eventos de tipo '{event.type}'"
+            )
+            logger.info(
+                f"Email NO enviado | IBAN={event.userId} | "
+                f"plan={plan} | event={event.type} | "
+                f"Debido a restricción del plan"
+            )
+        else:
+            if email:
+                logger.info(f"Enviando email a {email}")
+                await self.email_service.send_notification_email(
+                    to_email=email,
+                    subject=title,
+                    content=message,
+                )
+                email_sent=True
+            else:
+                email_sent = False
+                email_reason = "El usuario no tiene email registrado"
 
         # Crear notificación
         notification = NotificationCreate(
@@ -138,6 +220,9 @@ class Notifications_Service:
             message=message,
             metadata=event.metadata,
             email=email,
+            plan=plan,
+            email_sent=email_sent,
+            email_reason=email_reason
         )
 
         # Guardar en Mongo
@@ -145,48 +230,180 @@ class Notifications_Service:
             NotificationBase(**notification.model_dump())
         )
 
-        # Enviar email si existe
-        if email:
-            logger.info(f"Enviando email a {email}")
-            await self.email_service.send_notification_email(
-                to_email=email,
-                subject=title,
-                content=message,
-            )
-
         return saved
-    
+            
 
-    def format_history_email(self, metadata: dict) -> str:
-        transactions = metadata.get("transactions", [])
-        from_date = metadata.get("from", "—")
-        to_date = metadata.get("to", "—")
-        numRecords = len(transactions)
+    # def format_history_email(self, metadata: dict) -> str:
+    #     transactions = metadata.get("transactions", [])
+    #     from_date = metadata.get("from", "—")
+    #     to_date = metadata.get("to", "—")
+    #     numRecords = len(transactions)
+
+    #     if not transactions:
+    #         return (
+    #             f"Has solicitado tu historial de movimientos "
+    #             f"del {from_date} al {to_date}, pero no se han encontrado operaciones."
+    #         )
+
+    #     lines = [
+    #         f"Historial de movimientos del {from_date} al {to_date}:",
+    #         ""
+    #     ]
+
+    #     for tx in transactions:
+    #         amount = tx.get("amount", 0)
+    #         sign = "+" if amount > 0 else ""
+    #         lines.append(
+    #             f"• {tx.get('date')} | {sign}{amount} € | {tx.get('description')}"
+    #         )
+
+    #     lines.append("")
+    #     lines.append("Si no reconoces alguna operación, contacta con tu entidad bancaria.")
+
+    #     return "\n".join(lines)
+    
+    async def send_history_email(self, user_id: str, month: str | None):
+        # 1. Obtener info del usuario
+        user = await self.users_client.get_user_data(user_id)
+
+        from datetime import datetime
+        if not month:
+            month = datetime.now().strftime("%Y-%m")
+            logger.error(f"USER DATA en send_history_email: {user} después de asignar month por defecto")
+
+        if not isinstance(user, dict):
+            logger.warning(f"User data inválido para userId={user_id}: {user}")
+            raise ValueError("No se pudo obtener la información del usuario")
+
+        email = user.get("email")
+        plan = user.get("plan", "business")
+        name = user.get("name", "-")
+
+        # 2. Validar plan
+        if plan != "business":
+            logger.info(
+                f"Usuario {name} con plan '{plan}' ha intentado solicitar historial"
+            )
+            raise PermissionError("El plan actual no permite el envío del historial")
+
+        # 3. Obtener historial SOLO si el plan lo permite
+        history = self.get_mock_history(
+            iban=user_id,
+            month=month
+        )
+        # history = await self.fetch_history_from_statements(
+        #     iban=user_id,
+        #     month=month
+        # )
+
+        #summary = self.build_history_summary(history)
+
+        # 4. Construir email
+        message = self.format_history_email_from_service(history)
+
+        # 5. Enviar email
+        await self.email_service.send_notification_email(
+            to_email=email,
+            subject="Tu historial de movimientos",
+            content=message,
+        )
+        return message
+        
+    async def fetch_history_from_statements(self, iban: str, month: str):
+        async with httpx.AsyncClient(
+            verify=False,
+            timeout=5.0
+        ) as client:
+            res = await client.get(
+                "http://microservice-bank-statements:3000/v1/bankstatements/by-iban",
+                params={
+                    "iban": iban,
+                    "month": month
+                }
+            )
+            res.raise_for_status()
+            return res.json()
+    
+    def format_history_email_from_service(self, history: dict) -> str:
+        detail = history.get("detail", {})
+        transactions = detail.get("transactions", [])
 
         if not transactions:
             return (
-                f"Has solicitado tu historial de movimientos "
-                f"del {from_date} al {to_date}, pero no se han encontrado operaciones."
+                "Has solicitado tu historial de movimientos, "
+                "pero no se han encontrado operaciones en el periodo indicado."
             )
 
+        month = history.get("month", "")
         lines = [
-            f"Historial de movimientos del {from_date} al {to_date}:",
+            f"Tu historial de movimientos ({month}):",
             ""
         ]
 
         for tx in transactions:
+            date = tx.get("date", "-")
             amount = tx.get("amount", 0)
+            currency = tx.get("currency", "€")
+            description = tx.get("description", "-")
+
             sign = "+" if amount > 0 else ""
+
             lines.append(
-                f"• {tx.get('date')} | {sign}{amount} € | {tx.get('description')}"
+                f"• {date} | {sign}{amount} {currency} | {description}"
             )
 
         lines.append("")
-        lines.append("Si no reconoces alguna operación, contacta con tu entidad bancaria.")
+        lines.append(
+            "Si no reconoces alguna operación, contacta con tu entidad bancaria."
+        )
 
         return "\n".join(lines)
-    
 
+    def get_mock_history(self, iban: str, month: str) -> dict:
+        return {
+            "iban": iban,
+            "month": month,
+            "detail": {
+                "date_start": f"{month}-01T00:00:00.000Z",
+                "date_end": f"{month}-31T23:59:59.999Z",
+                "transactions": [
+                    {
+                        "date": f"{month}-05T12:30:00.000Z",
+                        "amount": 1200,
+                        "currency": "EUR",
+                        "description": "Ingreso nómina"
+                    },
+                    {
+                        "date": f"{month}-12T18:45:00.000Z",
+                        "amount": -75.50,
+                        "currency": "EUR",
+                        "description": "Supermercado"
+                    },
+                    {
+                        "date": f"{month}-20T09:10:00.000Z",
+                        "amount": -300,
+                        "currency": "EUR",
+                        "description": "Alquiler"
+                    }
+                ]
+            }
+        }
+    
+    #para mostrarlo en frontend
+
+    def build_history_summary(self, history: dict) -> list[dict]:
+        transactions = history.get("detail", {}).get("transactions", [])
+
+        return [
+            {
+                "date": tx.get("date"),
+                "amount": tx.get("amount"),
+                "currency": tx.get("currency"),
+                "description": tx.get("description"),
+            }
+            for tx in transactions
+        ]
+        
     async def get_all(self) -> list[NotificationView]:
         return await self.repo.get_all_notifications()
 
@@ -199,27 +416,46 @@ class Notifications_Service:
         return await self.repo.delete_notification(notification_id)
     
 
-
 class UsersClient:
-    async def get_user_email(self, user_id: str) -> str:
-        # MOCK para desarrollo / swagger
-        fake_users = {
-            "123": "elenaberdu@gmail.com",
-            "234": "bob@example.com",
-            "1": "elenaberdu@gmail.com"
-        }
-
-        return fake_users.get(user_id, "default@example.com")
+    async def get_user_data(self, user_id: str) -> dict | None:
+        logger.error("ENTRANDO EN UsersClient.get_user_data CON verify=False")
+        async with httpx.AsyncClient(
+            timeout=5.0,
+            verify=False
+        ) as client:
+            resp = await client.get(f"http://microservice-user-auth:3000/v1/users/{user_id}")
+            logger.error("dentro de async with")
+            if resp.status_code == 200:
+                logger.error("response 200")
+                return resp.json()
+        return "No se ha encontrado el usuario"
     
 
+class UsersClientssss:
+    async def get_user_data(self, user_id: str) -> dict:
+        # MOCK para desarrollo / swagger
+        fake_users = {
+            "123": {
+                "email": "basicuser@example.com",
+                "subscription": "basic"
+            },
+            "234": {
+                "email": "premiumuser@example.com",
+                "subscription": "premium"
+            },
+            "999": {
+                "email": "businessuser@example.com",
+                "subscription": "business"
+            }
+        }
 
-class UsersClientsss:
-    async def get_user_email(self, user_id: str) -> str | None:
-        async with httpx.AsyncClient() as client:
-            resp = await client.get(f"http://users-ms:8000/users/{user_id}")
-            if resp.status_code == 200:
-                return resp.json()["email"]
-        return "No se ha encontrado el usuario"
+        return fake_users.get(
+            user_id,
+            {
+                "email": "default@example.com",
+                "subscription": "basic"
+            }
+        )
 
 
     

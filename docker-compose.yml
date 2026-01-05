@@ -11,7 +11,7 @@ services:
 
   notifications:
     build: .
-    image: microservice-notifications:local
+    image: elenaberdugo/microservice-notifications:latest
     container_name: ms_notifications_api
     depends_on:
       - mongo
@@ -19,11 +19,19 @@ services:
       - MONGO_CONNECTION_STRING=mongodb://mongo:27017
       - MONGO_DATABASE_NAME=notifications_db
       - SENDGRID_API_KEY=${SENDGRID_API_KEY}
-      - SENDGRID_FROM_EMAIL=elenaberdu@gmail.com
+      - SENDGRID_FROM_EMAIL=${SENDGRID_FROM_EMAIL}
+      - PYTHONHTTPSVERIFY=0 # Desactivar la verificación SSL
+      - SSL_CERT_FILE=
+      - SSL_CERT_DIR=
     command: uvicorn src.notifications.app:create_app --factory --host 0.0.0.0 --port 8000
     ports:
       - "8000:8000"
     restart: unless-stopped
+    healthcheck:
+      test: CMD-SHELL curl -f "http://localhost:8000/v1/notifications/health"
+      interval: 30s
+      timeout: 5s
+      retries: 3
 
 volumes:
   mongo_data:

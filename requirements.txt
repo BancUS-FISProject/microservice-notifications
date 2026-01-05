@@ -41,3 +41,5 @@ pytest-twisted
 twisted
 sendgrid
 pydantic[email]
+certifi
+pip-system-certs
