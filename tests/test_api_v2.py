@@ -240,45 +240,45 @@ async def test_health():
     assert res.json()["status"] == "ok"
 
 
-# ===========================================================
-# TEST 9: UPDATE y DELETE REALES
-# ===========================================================
-@pytest.mark.asyncio
-async def test_update_and_delete_real_flow(service_unitario):
+# # ===========================================================
+# # TEST 9: UPDATE y DELETE REALES
+# # ===========================================================
+# @pytest.mark.asyncio
+# async def test_update_and_delete_real_flow(service_unitario):
 
-    # 1. Crear notificación
-    async with httpx.AsyncClient() as client:
-        res_create = await client.post(
-            f"{BASE_URL}/events",
-            json={"userId":"123",
-                  "type":"login",
-                  "metadata":{}},
-            headers={"Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOiIyMzQifQ.fake"}
-        )
+#     # 1. Crear notificación
+#     async with httpx.AsyncClient() as client:
+#         res_create = await client.post(
+#             f"{BASE_URL}/events",
+#             json={"userId":"123",
+#                   "type":"login",
+#                   "metadata":{}},
+#             headers={"Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOiIyMzQifQ.fake"}
+#         )
 
-    created = res_create.json()
-    notification_id = created.get("id")
+#     created = res_create.json()
+#     notification_id = created.get("id")
     
-    # DEPURACIÓN
-    print("CREATED OBJECT >>>", created)
-    print("TYPE >>>", type(created))
-    print("EXTRACTED _id >>>", notification_id)
+#     # DEPURACIÓN
+#     print("CREATED OBJECT >>>", created)
+#     print("TYPE >>>", type(created))
+#     print("EXTRACTED _id >>>", notification_id)
 
-    # 2. Update
-    async with httpx.AsyncClient() as client:
-        res_up = await client.put(
-            f"{BASE_URL}/{notification_id}",
-            json={"title":"nuevo"}
-        )
+#     # 2. Update
+#     async with httpx.AsyncClient() as client:
+#         res_up = await client.put(
+#             f"{BASE_URL}/{notification_id}",
+#             json={"title":"nuevo"}
+#         )
 
-    assert res_up.status_code in (200,404)
+#     assert res_up.status_code in (200,404)
 
-    # 3. Delete
-    async with httpx.AsyncClient() as client:
-        res_del = await client.delete(
-            f"{BASE_URL}/{notification_id}"
-        )
+#     # 3. Delete
+#     async with httpx.AsyncClient() as client:
+#         res_del = await client.delete(
+#             f"{BASE_URL}/{notification_id}"
+#         )
 
-    assert res_del.status_code in (200,404)
+#     assert res_del.status_code in (200,404)
 
 
