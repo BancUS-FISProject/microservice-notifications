@@ -11,8 +11,7 @@ class NotificationBase(BaseModel):
 
     type: Literal[
         "login",
-        "transaction-ok",
-        "transaction-failed",
+        "transaction",
         "scheduled-payment",
         "history-request",
         "fraud-detected"
@@ -37,8 +36,7 @@ class NotificationCreate(BaseModel):
 
     type: Literal[
         "login",
-        "transaction-ok",
-        "transaction-failed",
+        "transaction",
         "scheduled-payment",
         "history-request",
         "fraud-detected"
@@ -62,7 +60,7 @@ class NotificationView(BaseModel):
     userId: str
     email: Optional[EmailStr] | None
     plan: Optional[str] = None
-    type: str
+    type: Optional[str] = None
     title: Optional[str]
     message: str
     metadata: Optional[Dict[str, Any]] = Field(default_factory=dict)
@@ -80,8 +78,7 @@ class NotificationEvent(BaseModel):
 
     type: Literal[
         "login",
-        "transaction-ok",
-        "transaction-failed",
+        "transaction",
         "scheduled-payment",
         "history-request",
         "fraud-detected"
@@ -99,8 +96,7 @@ class NotificationUpdate(BaseModel):
     message: Optional[str] = None
     type: Optional[Literal[
         "login",
-        "transaction-ok",
-        "transaction-failed",
+        "transaction",
         "scheduled-payment",
         "history-request",
         "fraud-detected"

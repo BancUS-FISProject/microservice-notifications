@@ -1,4 +1,4 @@
-from quart import Blueprint, request
+from quart import Blueprint, abort, jsonify, request
 from quart_schema import validate_request, validate_response, tag
 
 from ...services.Email_Service import EmailService
@@ -8,11 +8,13 @@ from ...db.Notifications_Repository import Notifications_Repository
 from ...core import extensions as ext
 from logging import getLogger
 from ...core.config import settings
+import jwt
 
 logger = getLogger(__name__)
 logger.setLevel(settings.LOG_LEVEL)
 
 bp = Blueprint("notifications_bp_v1", __name__, url_prefix="/v1/notifications")
+DEFAULT_JWT = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOiIyMzQifQ.fake"
 
 # ======================================================
 # EVENTOS DESDE OTROS MICROSERVICIOS (CORE)
@@ -26,7 +28,25 @@ async def receive_event(data: NotificationEvent):
     Endpoint principal del microservicio.
     Recibe eventos desde otros MS (login, pagos, etc).
     """
-    service = Notifications_Service()
+    
+    # 1. Obtener el header Authorization
+    auth_header = request.headers.get('Authorization') or DEFAULT_JWT
+    if not auth_header:
+        return jsonify({"error": "Falta el header Authorization"}), 401
+    
+    # 2. Extraer el token (formato: "Bearer <token>")
+    _, token = auth_header.split(" ")
+    
+    # 3. Decodificar el JWT
+    jwt_data = decode_jwt(token)
+    
+    # 4. Validar que el recurso pertenece al usuario
+    jwt_iban = jwt_data.get('iban') or "123"  
+    if jwt_iban != data.userId:
+        abort(403, description="Unauthorized access")
+    
+    # 5. Continuamos con la lógica del endpoint
+    service = Notifications_Service(jwt=auth_header)
     result = await service.handle_event(data)
     return result, 201
 
@@ -42,6 +62,24 @@ async def get_notifications_by_user(userId: str):
     Devuelve todas las notificaciones de un usuario,
     ordenadas por fecha.
     """
+
+    # 1. Obtener el header Authorization
+    auth_header = request.headers.get('Authorization') or DEFAULT_JWT
+    if not auth_header:
+        return jsonify({"error": "Falta el header Authorization"}), 401
+    
+    # 2. Extraer el token (formato: "Bearer <token>")
+    _, token = auth_header.split(" ")
+    
+    # 3. Decodificar el JWT
+    jwt_data = decode_jwt(token)
+    
+    # 4. Validar que el recurso pertenece al usuario
+    jwt_iban = jwt_data.get('iban') or "123"  # o el claim que corresponda
+    if jwt_iban != userId:
+        abort(403, description="Unauthorized access")
+    
+    # 5. Continuamos con la lógica del endpoint
     repo = Notifications_Repository(ext.db)
     return await repo.get_notifications_by_user(userId)
 
@@ -133,6 +171,11 @@ async def test_email():
 async def health_check():
  
     return {"status": "ok", "service": "notifications"}, 200
+
+
+
+def decode_jwt(token):
+    return jwt.decode(token, options={"verify_signature": False})
 
 # ------------------------
 # POST: crear notificación

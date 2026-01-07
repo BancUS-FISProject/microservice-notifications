@@ -20,11 +20,10 @@ ssl_context = ssl.create_default_context(cafile=certifi.where())
 class Notifications_Service:
 
     PLAN_RULES = {
-        "basico": {"transaction-ok", "transaction-failed"},
-        "estudiante": {"transaction-ok", "transaction-failed", "login", "scheduled-payment", "fraud-detected"},
+        "basico": {"transaction", "login"},
+        "estudiante": {"transaction", "login", "scheduled-payment", "fraud-detected"},
         "pro": {
-            "transaction-ok",
-            "transaction-failed",
+            "transaction",
             "login",
             "scheduled-payment",
             "history-request",
@@ -32,15 +31,23 @@ class Notifications_Service:
         },
     }
 
+    ENDPOINTS_HISTORY = {
+    "all":      "/v1/transactions/user/{iban}",
+    "sent":     "/v1/transactions/user/{iban}/sent",
+    "received": "/v1/transactions/user/{iban}/received",
+    }
+
     def __init__(
         self, 
         repository: Notifications_Repository | None = None,
         email_service: EmailService | None = None,
         #users_client: UsersClient | None = None,
+        jwt: str | None = None
     ):
         self.repo = repository or Notifications_Repository(ext.db)
         self.email_service = email_service or EmailService()
         self.users_client = UsersClient()
+        self.jwt = jwt
 
     def can_send_email(self, plan: str, event_type: str) -> bool:
         return event_type in self.PLAN_RULES.get(plan, set())
@@ -76,40 +83,41 @@ class Notifications_Service:
         # ======================
         # TRANSACCIÓN OK
         # ======================
-        elif event.type == "transaction-ok":
+        elif event.type == "transaction":
             amount = metadata.get("amount", "importe desconocido")
-            currency = metadata.get("currency", "EUR")
+            #currency = metadata.get("currency", "EUR")
             recipient = metadata.get("recipient", "destinatario desconocido")
-            timestamp = metadata.get("timestamp", "fecha desconocida")
+            #timestamp = metadata.get("timestamp", "fecha desconocida")
+            timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
 
             title = "Pago realizado correctamente"
             message = (
                 f"Tu operación se ha completado con éxito.\n\n"
-                f"Importe: {amount} {currency}\n"
+                f"Importe: {amount} \n" #{currency}
                 f"Destinatario: {recipient}\n"
                 f"Fecha: {timestamp}\n\n"
                 f"Puedes consultar el detalle completo desde tu área personal."
             )
 
-        # ======================
-        # TRANSACCIÓN FALLIDA
-        # ======================
-        elif event.type == "transaction-failed":
-            amount = metadata.get("amount", "importe desconocido")
-            currency = metadata.get("currency", "EUR")
-            recipient = metadata.get("recipient", "destinatario desconocido")
-            reason = metadata.get("reason", "motivo no especificado")
-            timestamp = metadata.get("timestamp", "fecha desconocida")
+        # # ======================
+        # # TRANSACCIÓN FALLIDA
+        # # ======================
+        # elif event.type == "transaction-failed":
+        #     amount = metadata.get("amount", "importe desconocido")
+        #     currency = metadata.get("currency", "EUR")
+        #     recipient = metadata.get("recipient", "destinatario desconocido")
+        #     reason = metadata.get("reason", "motivo no especificado")
+        #     timestamp = metadata.get("timestamp", "fecha desconocida")
 
-            title = "No se ha podido completar tu pago"
-            message = (
-                f"Hemos intentado realizar una operación, pero no ha sido posible.\n\n"
-                f"Importe: {amount} {currency}\n"
-                f"Destinatario: {recipient}\n"
-                f"Fecha: {timestamp}\n"
-                f"Motivo: {reason}\n\n"
-                f"Por favor, revisa tus datos o inténtalo de nuevo más tarde."
-            )
+        #     title = "No se ha podido completar tu pago"
+        #     message = (
+        #         f"Hemos intentado realizar una operación, pero no ha sido posible.\n\n"
+        #         f"Importe: {amount} {currency}\n"
+        #         f"Destinatario: {recipient}\n"
+        #         f"Fecha: {timestamp}\n"
+        #         f"Motivo: {reason}\n\n"
+        #         f"Por favor, revisa tus datos o inténtalo de nuevo más tarde."
+        #     )
         
         # ----------------------
         # PAGO PROGRAMADO
@@ -131,15 +139,11 @@ class Notifications_Service:
         # HISTORIAL
         # ======================
         elif event.type == "history-request":
-            month = (
-            event.metadata.get("month")
-            if event.metadata else None
-            )
 
             try:
                 history_message = await self.send_history_email(
                     user_id=event.userId,
-                    month=month
+                    mode=metadata.get("mode", "all")
                 )
 
             except PermissionError as e:
@@ -270,17 +274,17 @@ class Notifications_Service:
 
     #     return "\n".join(lines)
     
-    async def send_history_email(self, user_id: str, month: str | None):
+    async def send_history_email(self, user_id: str, mode: str) -> str:
         # 1. Obtener info del usuario
         user = await self.users_client.get_user_data(user_id)
 
-        from datetime import datetime
-        if not month:
-            month = datetime.now().strftime("%Y-%m")
-            logger.error(f"USER DATA en send_history_email: {user} después de asignar month por defecto")
+        # from datetime import datetime
+        # if not month:
+        #     month = datetime.now().strftime("%Y-%m")
+        #     logger.error(f"USER DATA en send_history_email: {user} después de asignar month por defecto")
 
         if not isinstance(user, dict):
-            logger.warning(f"User data inválido para userId={user_id}: {user}, se le asignará un valor por defecto")
+            logger.warning(f"User data inválido para userId={user_id}: {user}, se le asignarán datos por defecto")
             user = {}
             #raise ValueError("No se pudo obtener la información del usuario")
             
@@ -297,69 +301,88 @@ class Notifications_Service:
             raise PermissionError("El plan actual no permite el envío del historial")
 
         # 3. Obtener historial SOLO si el plan lo permite
-        history = self.get_mock_history(
-            iban=user_id,
-            month=month
-        )
-        # history = await self.fetch_history_from_statements(
+        #mockeado
+        # history = self.get_mock_history(
         #     iban=user_id,
         #     month=month
         # )
+        #real
+        history = await self.fetch_history_from_transactions(
+            iban=user_id,
+            mode=mode
+        )
 
         #summary = self.build_history_summary(history)
 
         # 4. Construir email
-        message = self.format_history_email_from_service(history)
+        message = self.format_history_email_from_service(history, mode)
 
         # 5. Enviar email
         await self.email_service.send_notification_email(
             to_email=email,
-            subject="Tu historial de movimientos",
+            subject=self.get_subject_by_mode(mode),
             content=message,
         )
         return message
         
-    async def fetch_history_from_statements(self, iban: str, month: str):
+    async def fetch_history_from_transactions(self, iban: str, mode: str):
+
+        path = self.ENDPOINTS_HISTORY.get(mode, self.ENDPOINTS_HISTORY["all"])
+
         async with httpx.AsyncClient(
             verify=False,
             timeout=5.0
         ) as client:
+            # headers = {
+            #     "Authorization": f"{self.jwt}",
+            # }
+            headers = {"Content-Type": "application/json"}
+            if self.jwt:
+                headers["Authorization"] = self.jwt
+            
             res = await client.get(
-                "http://microservice-bank-statements:3000/v1/bankstatements/by-iban",
-                params={
-                    "iban": iban,
-                    "month": month
-                }
+                f"http://microservice-transfers:8000{path.format(iban=iban)}",
+                headers=headers,
             )
             res.raise_for_status()
             return res.json()
     
-    def format_history_email_from_service(self, history: dict) -> str:
-        detail = history.get("detail", {})
-        transactions = detail.get("transactions", [])
-
-        if not transactions:
+    def format_history_email_from_service(self, history: list[dict], mode: str) -> str:
+        if not history:
             return (
                 "Has solicitado tu historial de movimientos, "
                 "pero no se han encontrado operaciones en el periodo indicado."
             )
+        
+        intro = {
+            "sent": "movimientos enviados",
+            "received": "movimientos recibidos",
+            "all": "movimientos completo",
+        }.get(mode, "movimientos")
 
-        month = history.get("month", "")
         lines = [
-            f"Tu historial de movimientos ({month}):",
+            f"Tu historial de {intro}:",
             ""
         ]
 
-        for tx in transactions:
+        for tx in history:
+            # equivalencia:
             date = tx.get("date", "-")
-            amount = tx.get("amount", 0)
-            currency = tx.get("currency", "€")
-            description = tx.get("description", "-")
+            amount = tx.get("quantity", 0)
+            currency = tx.get("currency", "EUR")
 
-            sign = "+" if amount > 0 else ""
+            # descripción inteligente
+            if mode == "sent":
+                model = "enviada"
+            elif mode == "received":
+                model = "recibida"
+            else:
+                model = "realizada"
+                
+            description = f"Transferencia {model} de {tx.get('sender','-')} a {tx.get('receiver','-')}"
 
             lines.append(
-                f"• {date} | {sign}{amount} {currency} | {description}"
+                f"• {date} | {amount} {currency} | {description}"
             )
 
         lines.append("")
@@ -368,32 +391,36 @@ class Notifications_Service:
         )
 
         return "\n".join(lines)
+    
+    def get_subject_by_mode(self, mode: str) -> str:
+        match mode:
+            case "sent":
+                return "Historial de transferencias enviadas"
+            case "received":
+                return "Historial de transferencias recibidas"
+            case _:
+                return "Historial completo de movimientos"
 
     def get_mock_history(self, iban: str, month: str) -> dict:
         return {
             "iban": iban,
-            "month": month,
+            "mode": "all",
             "detail": {
-                "date_start": f"{month}-01T00:00:00.000Z",
-                "date_end": f"{month}-31T23:59:59.999Z",
                 "transactions": [
                     {
                         "date": f"{month}-05T12:30:00.000Z",
                         "amount": 1200,
-                        "currency": "EUR",
-                        "description": "Ingreso nómina"
+                        "recipient": "Empresa XYZ",
                     },
                     {
                         "date": f"{month}-12T18:45:00.000Z",
-                        "amount": -75.50,
-                        "currency": "EUR",
-                        "description": "Supermercado"
+                        "amount": -75.50,  
+                        "recipient": "Supermercado ABC",
                     },
                     {
                         "date": f"{month}-20T09:10:00.000Z",
                         "amount": -300,
-                        "currency": "EUR",
-                        "description": "Alquiler"
+                        "recipient": "Alquiler vivienda",
                     }
                 ]
             }
@@ -401,18 +428,18 @@ class Notifications_Service:
     
     #para mostrarlo en frontend
 
-    def build_history_summary(self, history: dict) -> list[dict]:
-        transactions = history.get("detail", {}).get("transactions", [])
+    # def build_history_summary(self, history: dict) -> list[dict]:
+    #     transactions = history.get("detail", {}).get("transactions", [])
 
-        return [
-            {
-                "date": tx.get("date"),
-                "amount": tx.get("amount"),
-                "currency": tx.get("currency"),
-                "description": tx.get("description"),
-            }
-            for tx in transactions
-        ]
+    #     return [
+    #         {
+    #             "date": tx.get("date"),
+    #             "amount": tx.get("amount"),
+    #             "currency": tx.get("currency"),
+    #             "description": tx.get("description"),
+    #         }
+    #         for tx in transactions
+    #     ]
         
     async def get_all(self) -> list[NotificationView]:
         return await self.repo.get_all_notifications()
@@ -429,12 +456,17 @@ class Notifications_Service:
 class UsersClient:
     async def get_user_data(self, user_id: str) -> dict | None:
         try:
+            headers = {"Content-Type": "application/json"}
+            if self.jwt:
+                headers["Authorization"] = self.jwt
+
             async with httpx.AsyncClient(
                 timeout=5.0,
                 verify=False
             ) as client:
                 resp = await client.get(
-                    f"http://microservice-user-auth:3000/v1/users/{user_id}"
+                    f"http://microservice-user-auth:3000/v1/users/{user_id}",
+                    headers=headers
                 )
                 if resp.status_code == 200:
                     return resp.json()

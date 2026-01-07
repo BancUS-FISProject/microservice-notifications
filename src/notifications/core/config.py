@@ -20,6 +20,7 @@ class Settings(BaseSettings):
 
     SENDGRID_API_KEY: str = os.getenv("SENDGRID_API_KEY")
     SENDGRID_FROM_EMAIL: str = os.getenv("SENDGRID_FROM_EMAIL")
+    SENDGRID_LOCAL_MODE: bool = True #os.getenv("SENDGRID_LOCAL_MODE", "false").lower() == "true"
     
     LOG_LEVEL: str = "DEBUG"
     LOG_FILE: str = "log.txt"

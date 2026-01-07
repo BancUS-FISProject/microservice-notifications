@@ -43,3 +43,4 @@ sendgrid
 pydantic[email]
 certifi
 pip-system-certs
+PyJWT
