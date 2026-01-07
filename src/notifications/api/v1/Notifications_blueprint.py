@@ -31,22 +31,24 @@ async def receive_event(data: NotificationEvent):
     
     # 1. Obtener el header Authorization
     auth_header = request.headers.get('Authorization') or DEFAULT_JWT
+    logger.debug(f"TOKEN RAW RECIBIDO events: {auth_header}")
+    logger.debug(f"HEADERS ENTRANTES event: {dict(request.headers)}")
     if not auth_header:
         return jsonify({"error": "Falta el header Authorization"}), 401
     
-    # 2. Extraer el token (formato: "Bearer <token>")
-    _, token = auth_header.split(" ")
+    # # 2. Extraer el token (formato: "Bearer <token>")
+    # _, token = auth_header.split(" ")
     
-    # 3. Decodificar el JWT
-    jwt_data = decode_jwt(token)
+    # # 3. Decodificar el JWT
+    # jwt_data = decode_jwt(token)
     
-    # 4. Validar que el recurso pertenece al usuario
-    jwt_iban = jwt_data.get('iban') or "123"  
-    if jwt_iban != data.userId:
-        abort(403, description="Unauthorized access")
+    # # 4. Validar que el recurso pertenece al usuario
+    # jwt_iban = jwt_data.get('iban') or "123"  
+    # if jwt_iban != data.userId:
+    #     abort(403, description="Unauthorized access")
     
     # 5. Continuamos con la lógica del endpoint
-    service = Notifications_Service(jwt=auth_header)
+    service = Notifications_Service(jwt=auth_header)  # jwt=auth_header)
     result = await service.handle_event(data)
     return result, 201
 
@@ -65,22 +67,24 @@ async def get_notifications_by_user(userId: str):
 
     # 1. Obtener el header Authorization
     auth_header = request.headers.get('Authorization') or DEFAULT_JWT
+    logger.debug(f"TOKEN RAW RECIBIDO list: {auth_header}")
+    logger.debug(f"HEADERS ENTRANTES list: {dict(request.headers)}")
     if not auth_header:
         return jsonify({"error": "Falta el header Authorization"}), 401
     
-    # 2. Extraer el token (formato: "Bearer <token>")
-    _, token = auth_header.split(" ")
+    # # 2. Extraer el token (formato: "Bearer <token>")
+    # _, token = auth_header.split(" ")
     
-    # 3. Decodificar el JWT
-    jwt_data = decode_jwt(token)
+    # # 3. Decodificar el JWT
+    # jwt_data = decode_jwt(token)
     
-    # 4. Validar que el recurso pertenece al usuario
-    jwt_iban = jwt_data.get('iban') or "123"  # o el claim que corresponda
-    if jwt_iban != userId:
-        abort(403, description="Unauthorized access")
+    # # 4. Validar que el recurso pertenece al usuario
+    # jwt_iban = jwt_data.get('iban') or "123"  # o el claim que corresponda
+    # if jwt_iban != userId:
+    #     abort(403, description="Unauthorized access")
     
     # 5. Continuamos con la lógica del endpoint
-    repo = Notifications_Repository(ext.db)
+    repo = Notifications_Repository(ext.db)  # jwt=auth_header)
     return await repo.get_notifications_by_user(userId)
 
 # ======================================================

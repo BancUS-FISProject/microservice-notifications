@@ -1,6 +1,8 @@
 from email.mime import message
 from importlib.metadata import metadata
+from turtle import mode
 import httpx
+#import jwt
 from ..models.Notifications import NotificationBase, NotificationCreate, NotificationView, NotificationEvent
 from ..db.Notifications_Repository import Notifications_Repository
 from ..core import extensions as ext
@@ -42,7 +44,7 @@ class Notifications_Service:
         repository: Notifications_Repository | None = None,
         email_service: EmailService | None = None,
         #users_client: UsersClient | None = None,
-        jwt: str | None = None
+        jwt = None
     ):
         self.repo = repository or Notifications_Repository(ext.db)
         self.email_service = email_service or EmailService()
@@ -139,6 +141,7 @@ class Notifications_Service:
         # HISTORIAL
         # ======================
         elif event.type == "history-request":
+            mode=metadata.get("mode", "all")
 
             try:
                 history_message = await self.send_history_email(
@@ -152,7 +155,13 @@ class Notifications_Service:
             except ValueError as e:
                 abort(400, description=str(e))
 
-            title = "Tu historial de movimientos"
+            if mode=="sent":
+                title = "Tu historial de transferencias enviadas"
+            elif mode=="received":
+                title = "Tu historial de transferencias recibidas"
+            else:
+                title = "Tu historial de transferencias completo"
+
             message = history_message
             skip_generic_email = True
             
@@ -177,7 +186,7 @@ class Notifications_Service:
 
         # Obtener info del usuario
         logger.error("antes de get user")
-        user = await self.users_client.get_user_data(event.userId)
+        user = await self.users_client.get_user_data(self.jwt, event.userId)
         logger.error("después de get user")
 
         if not isinstance(user, dict):
@@ -276,7 +285,7 @@ class Notifications_Service:
     
     async def send_history_email(self, user_id: str, mode: str) -> str:
         # 1. Obtener info del usuario
-        user = await self.users_client.get_user_data(user_id)
+        user = await self.users_client.get_user_data(self.jwt, user_id)
 
         # from datetime import datetime
         # if not month:
@@ -308,6 +317,7 @@ class Notifications_Service:
         # )
         #real
         history = await self.fetch_history_from_transactions(
+            self.jwt,
             iban=user_id,
             mode=mode
         )
@@ -325,7 +335,7 @@ class Notifications_Service:
         )
         return message
         
-    async def fetch_history_from_transactions(self, iban: str, mode: str):
+    async def fetch_history_from_transactions(self, jwt, iban: str, mode: str):
 
         path = self.ENDPOINTS_HISTORY.get(mode, self.ENDPOINTS_HISTORY["all"])
 
@@ -333,17 +343,19 @@ class Notifications_Service:
             verify=False,
             timeout=5.0
         ) as client:
-            # headers = {
-            #     "Authorization": f"{self.jwt}",
-            # }
-            headers = {"Content-Type": "application/json"}
-            if self.jwt:
-                headers["Authorization"] = self.jwt
+            headers = {
+                 "Authorization": f"{jwt}", # Ya viene con "Bearer ..."
+                 "Content-Type": "application/json"
+             }
             
             res = await client.get(
                 f"http://microservice-transfers:8000{path.format(iban=iban)}",
                 headers=headers,
             )
+            if res.status_code == 404:
+                logger.info(f"No hay movimientos para iban={iban}, mode={mode}")
+                return []   # historial vacío válido
+            
             res.raise_for_status()
             return res.json()
     
@@ -367,7 +379,14 @@ class Notifications_Service:
 
         for tx in history:
             # equivalencia:
-            date = tx.get("date", "-")
+            raw_date = tx.get("date", "-")
+            if raw_date:
+                try:
+                    date = datetime.fromisoformat(raw_date).strftime("%d/%m/%Y %H:%M")
+                except ValueError:
+                    date = raw_date  # fallback por si viene algo raro
+            else:
+                date = "-"
             amount = tx.get("quantity", 0)
             currency = tx.get("currency", "EUR")
 
@@ -454,16 +473,25 @@ class Notifications_Service:
     
 
 class UsersClient:
-    async def get_user_data(self, user_id: str) -> dict | None:
+    async def get_user_data(self, jwt, user_id: str) -> dict | None:
         try:
-            headers = {"Content-Type": "application/json"}
-            if self.jwt:
-                headers["Authorization"] = self.jwt
+            #headers = {"Content-Type": "application/json"}
+            # if jwt:
+            #     headers["Authorization"] = jwt
+            # USAR VARIABLE CORRECTA
+            # if self_token := getattr(self, "jwt", None):
+            #     headers["Authorization"] = str(self_token)
+            
 
             async with httpx.AsyncClient(
                 timeout=5.0,
                 verify=False
             ) as client:
+                
+                headers = {
+                 "Authorization": f"{jwt}", # Ya viene con "Bearer ..."
+                 "Content-Type": "application/json"
+             }
                 resp = await client.get(
                     f"http://microservice-user-auth:3000/v1/users/{user_id}",
                     headers=headers
