@@ -150,28 +150,8 @@ async def test_transaction_negative_ok(service_unitario):
     assert res.status_code == 201
 
 
-# ##################
-# # TEST 5: HISTORY REQUEST - PRO OK
-# ##################
-# @pytest.mark.asyncio
-# async def test_history_request_pro():
-#     payload = {
-#         "userId": "123",  # pro
-#         "type": "history-request",
-#         "metadata": {
-#             "mode": "all"
-#         }
-#     }
-
-#     async with httpx.AsyncClient() as client:
-#         res = await client.post(f"{BASE_URL}/events", json=payload, headers={"Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOiIyMzQifQ.fake"})
-
-#     assert res.status_code == 201
-#     assert "historial" in res.json()["title"].lower()
-#     assert res.json()["email_sent"] is True
-
 # ===========================================================
-# TEST 4: FRAUD
+# TEST 5: FRAUD
 # ===========================================================
 @pytest.mark.asyncio
 async def test_fraud_detected(service_unitario):
@@ -193,7 +173,7 @@ async def test_fraud_detected(service_unitario):
     assert res.status_code == 201
 
 # ===========================================================
-# TEST 5: UPDATE FAIL
+# TEST 6: UPDATE FAIL
 # ===========================================================
 @pytest.mark.asyncio
 async def test_update_notification_title_returns_error(service_unitario):
@@ -207,7 +187,7 @@ async def test_update_notification_title_returns_error(service_unitario):
 
 
 # ===========================================================
-# TEST 6: DELETE NON EXISTING
+# TEST 7: DELETE NON EXISTING
 # ===========================================================
 @pytest.mark.asyncio
 async def test_delete_non_existing_notification(service_unitario):
@@ -219,7 +199,7 @@ async def test_delete_non_existing_notification(service_unitario):
     assert res.status_code in (404, 500)
 
 # ===========================================================
-# TEST 7: SEND EMAIL SENDGRID
+# TEST 8: SEND EMAIL SENDGRID
 # ===========================================================
 @pytest.mark.asyncio
 async def test_send_email_sendgrid():
@@ -229,7 +209,7 @@ async def test_send_email_sendgrid():
     )
 
 # ==========================================================
-# TEST 8: HEALTH
+# TEST 9: HEALTH
 # ==========================================================
 @pytest.mark.asyncio
 async def test_health():
