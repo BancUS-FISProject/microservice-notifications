@@ -23,7 +23,7 @@ class Notifications_Service:
 
     PLAN_RULES = {
         "basico": {"transaction", "login"},
-        "estudiante": {"transaction", "login", "scheduled-payment", "fraud-detected"},
+        "premium": {"transaction", "login", "scheduled-payment", "fraud-detected"},
         "pro": {
             "transaction",
             "login",
