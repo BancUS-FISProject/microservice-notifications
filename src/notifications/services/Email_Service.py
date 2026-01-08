@@ -16,31 +16,36 @@ import json
 ssl._create_default_https_context = ssl._create_unverified_context
 
 logger = getLogger(__name__)
+
 # FIX SSL 
 #ssl_context = ssl.create_default_context(cafile=certifi.where())
 #ssl._create_default_https_context = ssl._create_unverified_context
 
 class EmailService:
     def __init__(self):
-        self.enabled = os.getenv("EMAIL_ENABLED", "true").lower() == "true"
-        if not self.enabled:
-            return
-        # MODO LOCAL
-        self.local_mode = True #os.getenv("SENDGRID_LOCAL_MODE")
 
-        if not self.enabled:
-            return
-
-        if self.local_mode:
-            self.sg = None   # no se crea cliente real
+        #intenta enviar por SendGrid, si no, se mockea el envío para que igualmente se puedan mostrar los mails en el front
+        if settings.SENDGRID_API_KEY == '':
+            logger.info("API KEY EN BLANCO")
+            self.sg = None 
+            self.local_mode = True
         else:
-            #antes, solo esto: 
-            self.sg = SendGridAPIClient(api_key=settings.SENDGRID_API_KEY)
+            try:
+                # MODO NORMAL - RESPUESTA REAL
+                self.sg = SendGridAPIClient(api_key=settings.SENDGRID_API_KEY)
+                logger.info("Intentando enviar con Sengrid")
+                self.local_mode = False
+            except:
+            # MODO LOCAL - RESPUESTA FAKE
+                self.sg = None 
+                self.local_mode = True
+                logger.info("No se ha conseguido ejecutar SendGridAPIClient, modo LOCAL ACTIVADO")
+        
         #self.sg.client._http_client._context = ssl._create_unverified_context()
 
     async def send_notification_email(self, to_email: str, subject: str, content: str):
 
-        # MODO LOCAL → RESPUESTA FAKE
+        # MODO LOCAL - RESPUESTA FAKE
         if self.local_mode:
             logger.info("LOCAL MODE - email fake OK")
             return {
@@ -51,12 +56,11 @@ class EmailService:
             }
         else:
 
-            #normal sendgrid email sending
+            # MODO NORMAL - RESPUESTA REAL
             if not settings.SENDGRID_API_KEY:
                 logger.info("SendGrid API key not found - email skipped")
                 return  
-            if not self.enabled:
-                return {"status": "email disabled"}
+
             try:
                 message = Mail(
                     from_email=settings.SENDGRID_FROM_EMAIL,
@@ -68,7 +72,7 @@ class EmailService:
                 response = self.sg.send(message)
 
                 logger.info(
-                    f"Email enviado a {to_email} | status={response.status_code}"
+                    f"Email enviado a {to_email} con SendGrid| status={response.status_code}"
                 )
                 logger.debug(response.body)
                 logger.debug(response.headers)

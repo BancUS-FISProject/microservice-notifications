@@ -101,26 +101,6 @@ class Notifications_Service:
                 f"Puedes consultar el detalle completo desde tu área personal."
             )
 
-        # # ======================
-        # # TRANSACCIÓN FALLIDA
-        # # ======================
-        # elif event.type == "transaction-failed":
-        #     amount = metadata.get("amount", "importe desconocido")
-        #     currency = metadata.get("currency", "EUR")
-        #     recipient = metadata.get("recipient", "destinatario desconocido")
-        #     reason = metadata.get("reason", "motivo no especificado")
-        #     timestamp = metadata.get("timestamp", "fecha desconocida")
-
-        #     title = "No se ha podido completar tu pago"
-        #     message = (
-        #         f"Hemos intentado realizar una operación, pero no ha sido posible.\n\n"
-        #         f"Importe: {amount} {currency}\n"
-        #         f"Destinatario: {recipient}\n"
-        #         f"Fecha: {timestamp}\n"
-        #         f"Motivo: {reason}\n\n"
-        #         f"Por favor, revisa tus datos o inténtalo de nuevo más tarde."
-        #     )
-        
         # ----------------------
         # PAGO PROGRAMADO
         # ----------------------
@@ -252,36 +232,6 @@ class Notifications_Service:
         )
 
         return saved
-            
-
-    # def format_history_email(self, metadata: dict) -> str:
-    #     transactions = metadata.get("transactions", [])
-    #     from_date = metadata.get("from", "—")
-    #     to_date = metadata.get("to", "—")
-    #     numRecords = len(transactions)
-
-    #     if not transactions:
-    #         return (
-    #             f"Has solicitado tu historial de movimientos "
-    #             f"del {from_date} al {to_date}, pero no se han encontrado operaciones."
-    #         )
-
-    #     lines = [
-    #         f"Historial de movimientos del {from_date} al {to_date}:",
-    #         ""
-    #     ]
-
-    #     for tx in transactions:
-    #         amount = tx.get("amount", 0)
-    #         sign = "+" if amount > 0 else ""
-    #         lines.append(
-    #             f"• {tx.get('date')} | {sign}{amount} € | {tx.get('description')}"
-    #         )
-
-    #     lines.append("")
-    #     lines.append("Si no reconoces alguna operación, contacta con tu entidad bancaria.")
-
-    #     return "\n".join(lines)
     
     async def send_history_email(self, user_id: str, mode: str) -> str:
         # 1. Obtener info del usuario
@@ -309,25 +259,16 @@ class Notifications_Service:
             )
             raise PermissionError("El plan actual no permite el envío del historial")
 
-        # 3. Obtener historial SOLO si el plan lo permite
-        #mockeado
-        # history = self.get_mock_history(
-        #     iban=user_id,
-        #     month=month
-        # )
-        #real
         history = await self.fetch_history_from_transactions(
             self.jwt,
             iban=user_id,
             mode=mode
         )
 
-        #summary = self.build_history_summary(history)
-
-        # 4. Construir email
+        # 3. Construir email
         message = self.format_history_email_from_service(history, mode)
 
-        # 5. Enviar email
+        # 4. Enviar email
         await self.email_service.send_notification_email(
             to_email=email,
             subject=self.get_subject_by_mode(mode),
@@ -444,21 +385,6 @@ class Notifications_Service:
                 ]
             }
         }
-    
-    #para mostrarlo en frontend
-
-    # def build_history_summary(self, history: dict) -> list[dict]:
-    #     transactions = history.get("detail", {}).get("transactions", [])
-
-    #     return [
-    #         {
-    #             "date": tx.get("date"),
-    #             "amount": tx.get("amount"),
-    #             "currency": tx.get("currency"),
-    #             "description": tx.get("description"),
-    #         }
-    #         for tx in transactions
-    #     ]
         
     async def get_all(self) -> list[NotificationView]:
         return await self.repo.get_all_notifications()
@@ -474,14 +400,7 @@ class Notifications_Service:
 
 class UsersClient:
     async def get_user_data(self, jwt, user_id: str) -> dict | None:
-        try:
-            #headers = {"Content-Type": "application/json"}
-            # if jwt:
-            #     headers["Authorization"] = jwt
-            # USAR VARIABLE CORRECTA
-            # if self_token := getattr(self, "jwt", None):
-            #     headers["Authorization"] = str(self_token)
-            
+        try:           
 
             async with httpx.AsyncClient(
                 timeout=5.0,
@@ -507,31 +426,63 @@ class UsersClient:
         return None
     
 
-class UsersClientssss:
-    async def get_user_data(self, user_id: str) -> dict:
-        # MOCK para desarrollo / swagger
-        fake_users = {
-            "123": {
-                "email": "basicuser@example.com",
-                "subscription": "basico"
-            },
-            "234": {
-                "email": "studentuser@example.com",
-                "subscription": "estudiante"
-            },
-            "999": {
-                "email": "prouser@example.com",
-                "subscription": "pro"
-            }
-        }
 
-        return fake_users.get(
-            user_id,
-            {
-                "email": "default@example.com",
-                "subscription": "basico"
-            }
-        )
+    
+# MOCK PARA GET EMAIL USER DE USER-AUTH MS
+# class UsersClientS:
+#     async def get_user_data(self, user_id: str) -> dict:
+#         # MOCK para desarrollo / swagger
+#         fake_users = {
+#             "123": {
+#                 "email": "basicuser@example.com",
+#                 "subscription": "basico"
+#             },
+#             "234": {
+#                 "email": "studentuser@example.com",
+#                 "subscription": "estudiante"
+#             },
+#             "999": {
+#                 "email": "prouser@example.com",
+#                 "subscription": "pro"
+#             }
+#         }
+
+#         return fake_users.get(
+#             user_id,
+#             {
+#                 "email": "default@example.com",
+#                 "subscription": "basico"
+#             }
+#         )
+
+    # def format_history_email(self, metadata: dict) -> str:
+    #     transactions = metadata.get("transactions", [])
+    #     from_date = metadata.get("from", "—")
+    #     to_date = metadata.get("to", "—")
+    #     numRecords = len(transactions)
+
+    #     if not transactions:
+    #         return (
+    #             f"Has solicitado tu historial de movimientos "
+    #             f"del {from_date} al {to_date}, pero no se han encontrado operaciones."
+    #         )
+
+    #     lines = [
+    #         f"Historial de movimientos del {from_date} al {to_date}:",
+    #         ""
+    #     ]
+
+    #     for tx in transactions:
+    #         amount = tx.get("amount", 0)
+    #         sign = "+" if amount > 0 else ""
+    #         lines.append(
+    #             f"• {tx.get('date')} | {sign}{amount} € | {tx.get('description')}"
+    #         )
+
+    #     lines.append("")
+    #     lines.append("Si no reconoces alguna operación, contacta con tu entidad bancaria.")
+
+    #     return "\n".join(lines)
 
 
     

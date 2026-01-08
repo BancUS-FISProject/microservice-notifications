@@ -36,17 +36,6 @@ async def receive_event(data: NotificationEvent):
     if not auth_header:
         return jsonify({"error": "Falta el header Authorization"}), 401
     
-    # # 2. Extraer el token (formato: "Bearer <token>")
-    # _, token = auth_header.split(" ")
-    
-    # # 3. Decodificar el JWT
-    # jwt_data = decode_jwt(token)
-    
-    # # 4. Validar que el recurso pertenece al usuario
-    # jwt_iban = jwt_data.get('iban') or "123"  
-    # if jwt_iban != data.userId:
-    #     abort(403, description="Unauthorized access")
-    
     # 5. Continuamos con la lógica del endpoint
     service = Notifications_Service(jwt=auth_header)  # jwt=auth_header)
     result = await service.handle_event(data)
@@ -72,29 +61,9 @@ async def get_notifications_by_user(userId: str):
     if not auth_header:
         return jsonify({"error": "Falta el header Authorization"}), 401
     
-    # # 2. Extraer el token (formato: "Bearer <token>")
-    # _, token = auth_header.split(" ")
-    
-    # # 3. Decodificar el JWT
-    # jwt_data = decode_jwt(token)
-    
-    # # 4. Validar que el recurso pertenece al usuario
-    # jwt_iban = jwt_data.get('iban') or "123"  # o el claim que corresponda
-    # if jwt_iban != userId:
-    #     abort(403, description="Unauthorized access")
-    
     # 5. Continuamos con la lógica del endpoint
     repo = Notifications_Repository(ext.db)  # jwt=auth_header)
     return await repo.get_notifications_by_user(userId)
-
-# ======================================================
-# SOLICITUD ENVÍO DE HISTORIAL (FRONTEND)
-# ======================================================
-@bp.post("/user/<userId>/send-history")
-async def send_history_email(userId: str):
-    service = Notifications_Service()
-    await service.send_history_email(userId)
-    return {"status": "email sent"}, 200
 
 # ======================================================
 # CONSULTA GLOBAL (ADMIN)

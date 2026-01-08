@@ -2,10 +2,6 @@ import pytest
 import httpx
 from src.notifications.core import extensions as ext
 
-#pytest.skip(
-#    "Tests v1 desactivados (solo se mantiene test_api_v2)",
-#    allow_module_level=True
-#)
 
 BASE_URL = "http://127.0.0.1:8000/v1/notifications/"
 

@@ -19,9 +19,6 @@ class Notifications_Repository:
         result = await self.collection.insert_one(doc)
 
         created = await self.collection.find_one({"_id": result.inserted_id})
-    
-        #print("CREATED DOC >>>", created)
-        #print("TYPE createdAt >>>", type(created.get("createdAt")))
 
         created["_id"] = str(created["_id"])
 

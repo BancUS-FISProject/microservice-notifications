@@ -13,7 +13,6 @@ from .api.v1.Notifications_blueprint import bp as notifications_bp_v1
 
 #el cerebro que arranca todo
 
-
 ## Logger configuration ##
 logger = getLogger()
 logger.setLevel(settings.LOG_LEVEL)
