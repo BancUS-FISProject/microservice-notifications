@@ -25,8 +25,12 @@ DEFAULT_JWT = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOiIyMzQifQ.fake"
 @validate_response(NotificationView, 201)
 async def receive_event(data: NotificationEvent):
     """
-    Endpoint principal del microservicio.
-    Recibe eventos desde otros MS (login, pagos, etc).
+    Endpoint principal del microservicio de notificaciones.
+
+    Recibe eventos procedentes de otros microservicios (login, pagos,
+    fraude, etc.) y genera notificaciones persistidas en base de datos.
+    Dependiendo del tipo de evento, puede desencadenar el envío de correos
+    electrónicos mediante SendGrid.
     """
     
     # 1. Obtener el header Authorization
@@ -43,18 +47,19 @@ async def receive_event(data: NotificationEvent):
 
 
 # ======================================================
-# CONSULTA DE NOTIFICACIONES (FRONTEND)
+# CONSULTA DE NOTIFICACIONES POR USUARIO (FRONTEND)
 # ======================================================
 @bp.get("/user/<userId>")
 @tag(["Consulta - Usuario"])
 @validate_response(list[NotificationView], 200)
 async def get_notifications_by_user(userId: str):
     """
-    Devuelve todas las notificaciones de un usuario,
-    ordenadas por fecha.
+    Devuelve todas las notificaciones asociadas a un usuario concreto.
+
+    Las notificaciones se devuelven ordenadas por fecha de creación,
+    de la más reciente a la más antigua.
     """
 
-    # 1. Obtener el header Authorization
     auth_header = request.headers.get('Authorization') or DEFAULT_JWT
     logger.debug(f"TOKEN RAW RECIBIDO list: {auth_header}")
     logger.debug(f"HEADERS ENTRANTES list: {dict(request.headers)}")
@@ -74,7 +79,9 @@ async def get_notifications_by_user(userId: str):
 async def get_all_notifications():
     """
     Devuelve todas las notificaciones del sistema.
-    Endpoint de administración o debugging.
+
+    Endpoint pensado para tareas de administración,
+    monitorización o debugging interno.
     """
     service = Notifications_Service(
         Notifications_Repository(ext.db)
@@ -83,11 +90,16 @@ async def get_all_notifications():
 
 
 # ======================================================
-# DELETE NOTIFICATION (ADMIN)
+# ELIMINAR NOTIFICACIÓN (ADMIN)
 # ======================================================
 @bp.delete("/<notification_id>")
 @tag(["Admin - Delete"])
 async def delete_notification(notification_id: str):
+    """
+    Elimina una notificación existente por su identificador.
+
+    Si la notificación no existe, se devuelve un error 404.
+    """
     service = Notifications_Service()
     deleted = await service.delete(notification_id)
 
@@ -97,24 +109,28 @@ async def delete_notification(notification_id: str):
     return {"status": "deleted"}, 200
 
 
-# ------------------------
-# PUT: actualizar notificación
-# ------------------------
+# ======================================================
+# ACTUALIZAR NOTIFICACIÓN
+# ======================================================
 @bp.put("/<notification_id>")
 @tag(["Notifications - Update"])
 @validate_request(NotificationUpdate)
 async def update_notification(notification_id: str, data: NotificationUpdate):
-   service = Notifications_Service()
-   updated = await service.update(
-       notification_id,
-       data.model_dump(exclude_none=True)
-   )
+    """
+    Actualiza los campos de una notificación existente.
 
-   if not updated:
-       return {"error": "Notification not found"}, 404
+    Solo se modificarán los campos presentes en el payload.
+    """
+    service = Notifications_Service()
+    updated = await service.update(
+        notification_id,
+        data.model_dump(exclude_none=True)
+    )
 
-   return updated, 200
+    if not updated:
+        return {"error": "Notification not found"}, 404
 
+    return updated, 200
 
 
 # ======================================================
@@ -124,7 +140,10 @@ async def update_notification(notification_id: str, data: NotificationUpdate):
 @tag(["Debug"])
 async def test_email():
     """
-    Endpoint de prueba para verificar SendGrid.
+    Endpoint de prueba para verificar la integración con SendGrid.
+
+    Envía un correo electrónico de prueba utilizando la configuración
+    actual del servicio de notificaciones.
     """
     email_service = EmailService()
 
@@ -137,12 +156,17 @@ async def test_email():
     return {"status": "email sent"}
 
 # ======================================================
-# HEALTH
+# HEALTH CHECK
 # ======================================================
 @bp.get("/health")
 @tag(["Health"])
 async def health_check():
- 
+    """
+    Healthcheck del microservicio.
+
+    Pensado para ser utilizado como endpoint de liveness/readiness
+    en entornos Docker o Kubernetes.
+    """
     return {"status": "ok", "service": "notifications"}, 200
 
 
